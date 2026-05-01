@@ -65,6 +65,9 @@ class OrderControllerTest @Autowired constructor(
         }
             .andExpect {
                 status { isBadRequest() }
+                jsonPath("$.status") { value(400) }
+                jsonPath("$.error") { value("Validation failed") }
+                jsonPath("$.fields.customerId") { exists() }
             }
     }
 }
