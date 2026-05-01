@@ -8,6 +8,5 @@ class OrderFlowLabApplicationTests {
 
     @Test
     fun contextLoads() {
-        println("OrderFlowLab Application Tests")
     }
 }

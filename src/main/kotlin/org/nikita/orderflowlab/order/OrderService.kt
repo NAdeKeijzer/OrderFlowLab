@@ -1,5 +1,6 @@
 package org.nikita.orderflowlab.order
 
+import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -8,8 +9,19 @@ class OrderService(
     private val orderRepository: OrderRepository
 ) {
 
-    fun createOrder(customerId: UUID): Order {
+    fun createOrder(
+        customerId: UUID,
+        items: List<CreateOrderLineRequest>
+    ): Order {
         val order = Order(customerId = customerId)
+
+        items.forEach {
+            order.addLine(
+                productId = it.productId!!,
+                quantity = it.quantity
+            )
+        }
+
         return orderRepository.save(order)
     }
 
