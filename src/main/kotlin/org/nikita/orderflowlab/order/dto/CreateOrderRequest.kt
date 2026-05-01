@@ -5,5 +5,5 @@ import java.util.*
 
 data class CreateOrderRequest(
     @field:NotNull
-    val customerId: UUID
+    val customerId: UUID?
 )

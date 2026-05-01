@@ -53,4 +53,18 @@ class OrderControllerTest @Autowired constructor(
                 status { isNotFound() }
             }
     }
+    @Test
+    fun `rejects order without customer id`() {
+        mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+            {
+              "customerId": null
+            }
+        """.trimIndent()
+        }
+            .andExpect {
+                status { isBadRequest() }
+            }
+    }
 }

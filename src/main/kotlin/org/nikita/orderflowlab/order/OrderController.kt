@@ -1,5 +1,6 @@
 package org.nikita.orderflowlab.order
 
+import jakarta.validation.Valid
 import org.nikita.orderflowlab.order.dto.CreateOrderRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -12,8 +13,9 @@ class OrderController(
 ) {
 
     @PostMapping
-    fun createOrder(@RequestBody request: CreateOrderRequest): ResponseEntity<Order> {
-        val order = orderService.createOrder(request.customerId)
+    fun createOrder(@Valid @RequestBody request: CreateOrderRequest):
+            ResponseEntity<Order> {
+        val order = orderService.createOrder(request.customerId!!)
         return ResponseEntity.ok(order)
     }
 
