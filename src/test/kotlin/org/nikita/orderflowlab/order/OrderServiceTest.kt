@@ -63,4 +63,20 @@ class OrderServiceTest @Autowired constructor(
         assertThat(order.lines.first().productId).isEqualTo(productId)
         assertThat(order.lines.first().quantity).isEqualTo(2)
     }
+
+    @Test
+    fun `can mark order as paid`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val items = listOf(
+            CreateOrderLineRequest(productId = productId, quantity = 2)
+        )
+
+        val order = orderService.createOrder(customerId, items)
+
+        val updated = orderService.markAsPaid(order.id)
+
+        assertThat(updated.status).isEqualTo(OrderStatus.PAID)
+    }
 }

@@ -32,4 +32,12 @@ class OrderService(
     fun getAll(): List<Order> {
         return orderRepository.findAll()
     }
+
+    fun markAsPaid(id: UUID): Order {
+        val order = orderRepository.findById(id)
+            .orElseThrow { RuntimeException("Order not found") }
+
+        order.status = OrderStatus.PAID
+        return orderRepository.save(order)
+    }
 }

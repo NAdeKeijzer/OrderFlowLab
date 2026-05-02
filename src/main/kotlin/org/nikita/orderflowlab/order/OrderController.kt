@@ -21,9 +21,15 @@ class OrderController(
             customerId = request.customerId!!,
             items = request.items
         )
-
         return ResponseEntity.ok(OrderResponse.from(order))
     }
+
+    @PatchMapping("/{id}/pay")
+    fun payOrder(@PathVariable id: UUID): ResponseEntity<OrderResponse> {
+        val order = orderService.markAsPaid(id)
+        return ResponseEntity.ok(OrderResponse.from(order))
+    }
+
     @GetMapping("/{id}")
     fun getOrder(@PathVariable id: UUID): ResponseEntity<OrderResponse> {
         val order = orderService.getOrder(id)
@@ -31,6 +37,7 @@ class OrderController(
 
         return ResponseEntity.ok(OrderResponse.from(order))
     }
+
     @GetMapping
     fun getAll(): List<OrderResponse> =
         orderService.getAll().map { OrderResponse.from(it) }
