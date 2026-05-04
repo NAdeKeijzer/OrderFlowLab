@@ -2,12 +2,14 @@ package org.nikita.orderflowlab.order
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.ActiveProfiles
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.UUID
 
 @SpringBootTest
+@ActiveProfiles("test")
 class OrderServiceTest @Autowired constructor(
     private val orderService: OrderService
 ) {

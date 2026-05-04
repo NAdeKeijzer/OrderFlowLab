@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
@@ -14,9 +15,11 @@ import java.util.UUID
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrderControllerTest @Autowired constructor(
-    private val mockMvc: MockMvc
-) {
+@ActiveProfiles("test")
+class OrderControllerTest {
+
+    @Autowired
+    lateinit var mockMvc: MockMvc
 
     @Test
     fun `creates an order with items`() {
