@@ -1,7 +1,6 @@
 package org.nikita.orderflowlab.order
 
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
-import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -16,16 +15,20 @@ class OrderService(
         customerId: UUID,
         items: List<CreateOrderLineRequest>
     ): Order {
-
-        if (items.isEmpty()) {
-            throw EmptyOrderException()
+        val orderLineInputs = items.map {
+            OrderLineInput(
+                productId = it.productId!!,
+                quantity = it.quantity
+            )
         }
 
-        val order = Order.create(customerId, items)
+        val order = Order.create(
+            customerId = customerId,
+            items = orderLineInputs
+        )
 
         return orderRepository.save(order)
     }
-
     @Transactional(readOnly = true)
     fun getOrder(id: UUID): Order? {
         return orderRepository.findById(id).orElse(null)
