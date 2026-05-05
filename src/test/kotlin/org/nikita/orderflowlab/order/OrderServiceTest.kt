@@ -6,6 +6,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import java.util.UUID
 
 @SpringBootTest
@@ -80,5 +81,23 @@ class OrderServiceTest @Autowired constructor(
         val updated = orderService.markAsPaid(order.id)
 
         assertThat(updated.status).isEqualTo(OrderStatus.PAID)
+    }
+
+    @Test
+    fun `cannot pay an order twice`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val items = listOf(
+            CreateOrderLineRequest(productId = productId, quantity = 2)
+        )
+
+        val order = orderService.createOrder(customerId, items)
+
+        orderService.markAsPaid(order.id)
+
+        assertThatThrownBy {
+            orderService.markAsPaid(order.id)
+        }.isInstanceOf(OrderAlreadyPaidException::class.java)
     }
 }

@@ -42,6 +42,10 @@ class OrderService(
         val order = orderRepository.findById(id)
             .orElseThrow { RuntimeException("Order not found") }
 
+        if (order.status == OrderStatus.PAID) {
+            throw OrderAlreadyPaidException(id)
+        }
+
         order.status = OrderStatus.PAID
 
         return orderRepository.save(order)

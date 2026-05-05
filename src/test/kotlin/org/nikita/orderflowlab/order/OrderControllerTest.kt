@@ -169,4 +169,43 @@ class OrderControllerTest {
                 jsonPath("$.status") { value("PAID") }
             }
     }
+
+    @Test
+    fun `returns conflict when paying order twice`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val createResponse = mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+            {
+              "customerId": "$customerId",
+              "items": [
+                {
+                  "productId": "$productId",
+                  "quantity": 2
+                }
+              ]
+            }
+        """.trimIndent()
+        }.andReturn()
+
+        val id = JsonPath.read<String>(
+            createResponse.response.contentAsString,
+            "$.id"
+        )
+
+        mockMvc.patch("/orders/$id/pay")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.status") { value("PAID") }
+            }
+
+        mockMvc.patch("/orders/$id/pay")
+            .andExpect {
+                status { isConflict() }
+                jsonPath("$.status") { value(409) }
+                jsonPath("$.error") { value("Order already paid") }
+            }
+    }
 }
