@@ -52,7 +52,9 @@ src/test/kotlin/org/nikita/orderflowlab
 
 ## ⚙️ Running the application
 
-### 1. Start the app
+### Option 1 — Default (H2 in-memory database)
+
+Start the app:
 
 ```
 ./gradlew bootRun
@@ -62,6 +64,32 @@ App will run on:
 
 ```
 http://localhost:8080
+```
+
+This uses an in-memory H2 database. Data is lost when the app stops.
+
+---
+
+### Option 2 — PostgreSQL (recommended)
+
+#### 1. Start PostgreSQL via Docker
+
+```
+docker compose -f infrastructure/docker-compose.yml up -d
+```
+
+#### 2. Run the application with the postgres profile
+
+```
+./gradlew bootRun --args='--spring.profiles.active=postgres'
+```
+
+---
+
+### Verify the application is running
+
+```
+http://localhost:8080/actuator/health
 ```
 
 ---
