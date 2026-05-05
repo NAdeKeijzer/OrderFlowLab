@@ -39,4 +39,20 @@ class Order(
             )
         )
     }
+
+    fun markAsPaid() {
+        if (status == OrderStatus.PAID) {
+            throw OrderAlreadyPaidException(id)
+        }
+
+        status = OrderStatus.PAID
+    }
+
+    fun cancel() {
+        if (status == OrderStatus.PAID) {
+            throw PaidOrderCannotBeCancelledException(id)
+        }
+
+        status = OrderStatus.CANCELLED
+    }
 }
