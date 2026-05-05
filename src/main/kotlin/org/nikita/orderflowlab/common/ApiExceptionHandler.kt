@@ -1,5 +1,6 @@
 package org.nikita.orderflowlab.common
 
+import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
@@ -85,6 +86,21 @@ class ApiExceptionHandler {
                 ErrorResponse(
                     status = 400,
                     error = "Invalid order line quantity",
+                    message = ex.message
+                )
+            )
+    }
+
+    @ExceptionHandler(EmptyOrderException::class)
+    fun handleEmptyOrder(
+        ex: EmptyOrderException
+    ): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(
+                ErrorResponse(
+                    status = 400,
+                    error = "Empty order",
                     message = ex.message
                 )
             )
