@@ -30,6 +30,12 @@ class OrderController(
         return ResponseEntity.ok(OrderResponse.from(order))
     }
 
+    @PatchMapping("/{id}/cancel")
+    fun cancelOrder(@PathVariable id: UUID): ResponseEntity<OrderResponse> {
+        val order = orderService.cancelOrder(id)
+        return ResponseEntity.ok(OrderResponse.from(order))
+    }
+
     @GetMapping("/{id}")
     fun getOrder(@PathVariable id: UUID): ResponseEntity<OrderResponse> {
         val order = orderService.getOrder(id)

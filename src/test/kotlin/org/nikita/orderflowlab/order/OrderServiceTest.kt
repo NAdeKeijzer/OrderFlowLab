@@ -100,4 +100,20 @@ class OrderServiceTest @Autowired constructor(
             orderService.markAsPaid(order.id)
         }.isInstanceOf(OrderAlreadyPaidException::class.java)
     }
+
+    @Test
+    fun `can cancel order`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val items = listOf(
+            CreateOrderLineRequest(productId = productId, quantity = 2)
+        )
+
+        val order = orderService.createOrder(customerId, items)
+
+        val cancelled = orderService.cancelOrder(order.id)
+
+        assertThat(cancelled.status).isEqualTo(OrderStatus.CANCELLED)
+    }
 }

@@ -50,4 +50,14 @@ class OrderService(
 
         return orderRepository.save(order)
     }
+
+    @Transactional
+    fun cancelOrder(id: UUID): Order {
+        val order = orderRepository.findById(id)
+            .orElseThrow { RuntimeException("Order not found") }
+
+        order.status = OrderStatus.CANCELLED
+
+        return orderRepository.save(order)
+    }
 }

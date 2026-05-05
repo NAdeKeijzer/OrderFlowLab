@@ -208,4 +208,36 @@ class OrderControllerTest {
                 jsonPath("$.error") { value("Order already paid") }
             }
     }
+
+    @Test
+    fun `can cancel order via endpoint`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val createResponse = mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+            {
+              "customerId": "$customerId",
+              "items": [
+                {
+                  "productId": "$productId",
+                  "quantity": 2
+                }
+              ]
+            }
+        """.trimIndent()
+        }.andReturn()
+
+        val id = JsonPath.read<String>(
+            createResponse.response.contentAsString,
+            "$.id"
+        )
+
+        mockMvc.patch("/orders/$id/cancel")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.status") { value("CANCELLED") }
+            }
+    }
 }
