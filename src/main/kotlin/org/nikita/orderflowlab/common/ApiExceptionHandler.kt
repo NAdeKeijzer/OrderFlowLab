@@ -1,7 +1,8 @@
 package org.nikita.orderflowlab.common
 
-import org.nikita.orderflowlab.order.OrderAlreadyPaidException
-import org.nikita.orderflowlab.order.PaidOrderCannotBeCancelledException
+import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
+import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
+import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -70,6 +71,21 @@ class ApiExceptionHandler {
                     status = 409,
                     error = "Paid order cannot be cancelled",
                     message = exception.message
+                )
+            )
+    }
+
+    @ExceptionHandler(InvalidOrderLineQuantityException::class)
+    fun handleInvalidQuantity(
+        ex: InvalidOrderLineQuantityException
+    ): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(
+                ErrorResponse(
+                    status = 400,
+                    error = "Invalid order line quantity",
+                    message = ex.message
                 )
             )
     }

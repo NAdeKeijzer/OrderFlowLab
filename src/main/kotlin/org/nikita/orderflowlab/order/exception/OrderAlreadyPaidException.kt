@@ -1,4 +1,4 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.exception
 
 import java.util.UUID
 
