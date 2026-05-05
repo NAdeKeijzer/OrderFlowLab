@@ -7,6 +7,9 @@ import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
+import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
+import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import java.util.UUID
 
 @SpringBootTest
@@ -132,5 +135,19 @@ class OrderServiceTest @Autowired constructor(
         assertThatThrownBy {
             orderService.cancelOrder(order.id)
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
+    }
+
+    @Test
+    fun `throws when creating order with invalid quantity`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val items = listOf(
+            CreateOrderLineRequest(productId = productId, quantity = 0)
+        )
+
+        assertThatThrownBy {
+            orderService.createOrder(customerId, items)
+        }.isInstanceOf(InvalidOrderLineQuantityException::class.java)
     }
 }

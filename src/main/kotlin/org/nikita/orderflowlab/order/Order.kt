@@ -1,6 +1,9 @@
 package org.nikita.orderflowlab.order
 
 import jakarta.persistence.*
+import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
+import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
+import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import java.time.Instant
 import java.util.UUID
 
@@ -31,6 +34,10 @@ class Order(
 ) {
 
     fun addLine(productId: UUID, quantity: Int) {
+        if (quantity <= 0) {
+            throw InvalidOrderLineQuantityException(quantity)
+        }
+
         lines.add(
             OrderLine(
                 productId = productId,
