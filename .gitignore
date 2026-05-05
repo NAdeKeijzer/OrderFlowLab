@@ -16,3 +16,4 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
+/HELP.md
