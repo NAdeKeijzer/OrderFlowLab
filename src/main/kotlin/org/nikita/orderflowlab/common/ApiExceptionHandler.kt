@@ -1,6 +1,7 @@
 package org.nikita.orderflowlab.common
 
 import org.nikita.orderflowlab.order.OrderAlreadyPaidException
+import org.nikita.orderflowlab.order.PaidOrderCannotBeCancelledException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -53,6 +54,21 @@ class ApiExceptionHandler {
                 ErrorResponse(
                     status = 409,
                     error = "Order already paid",
+                    message = exception.message
+                )
+            )
+    }
+
+    @ExceptionHandler(PaidOrderCannotBeCancelledException::class)
+    fun handlePaidOrderCannotBeCancelled(
+        exception: PaidOrderCannotBeCancelledException
+    ): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(
+                ErrorResponse(
+                    status = 409,
+                    error = "Paid order cannot be cancelled",
                     message = exception.message
                 )
             )

@@ -240,4 +240,42 @@ class OrderControllerTest {
                 jsonPath("$.status") { value("CANCELLED") }
             }
     }
+
+    @Test
+    fun `returns conflict when cancelling paid order`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val createResponse = mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+            {
+              "customerId": "$customerId",
+              "items": [
+                {
+                  "productId": "$productId",
+                  "quantity": 2
+                }
+              ]
+            }
+        """.trimIndent()
+        }.andReturn()
+
+        val id = JsonPath.read<String>(
+            createResponse.response.contentAsString,
+            "$.id"
+        )
+
+        mockMvc.patch("/orders/$id/pay")
+            .andExpect {
+                status { isOk() }
+            }
+
+        mockMvc.patch("/orders/$id/cancel")
+            .andExpect {
+                status { isConflict() }
+                jsonPath("$.status") { value(409) }
+                jsonPath("$.error") { value("Paid order cannot be cancelled") }
+            }
+    }
 }

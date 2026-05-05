@@ -116,4 +116,21 @@ class OrderServiceTest @Autowired constructor(
 
         assertThat(cancelled.status).isEqualTo(OrderStatus.CANCELLED)
     }
+
+    @Test
+    fun `cannot cancel paid order`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val items = listOf(
+            CreateOrderLineRequest(productId = productId, quantity = 2)
+        )
+
+        val order = orderService.createOrder(customerId, items)
+        orderService.markAsPaid(order.id)
+
+        assertThatThrownBy {
+            orderService.cancelOrder(order.id)
+        }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
+    }
 }

@@ -56,6 +56,10 @@ class OrderService(
         val order = orderRepository.findById(id)
             .orElseThrow { RuntimeException("Order not found") }
 
+        if (order.status == OrderStatus.PAID) {
+            throw PaidOrderCannotBeCancelledException(id)
+        }
+
         order.status = OrderStatus.CANCELLED
 
         return orderRepository.save(order)
