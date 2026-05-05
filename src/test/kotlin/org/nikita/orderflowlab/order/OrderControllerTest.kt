@@ -278,4 +278,22 @@ class OrderControllerTest {
                 jsonPath("$.error") { value("Paid order cannot be cancelled") }
             }
     }
+
+    @Test
+    fun `rejects empty order`() {
+        val customerId = UUID.randomUUID()
+
+        mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+        {
+          "customerId": "$customerId",
+          "items": []
+        }
+        """
+        }
+            .andExpect {
+                status { isBadRequest() }
+            }
+    }
 }

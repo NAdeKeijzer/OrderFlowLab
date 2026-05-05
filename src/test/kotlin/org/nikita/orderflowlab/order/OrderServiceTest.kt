@@ -7,6 +7,7 @@ import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
@@ -149,5 +150,14 @@ class OrderServiceTest @Autowired constructor(
         assertThatThrownBy {
             orderService.createOrder(customerId, items)
         }.isInstanceOf(InvalidOrderLineQuantityException::class.java)
+    }
+
+    @Test
+    fun `throws when creating empty order`() {
+        val customerId = UUID.randomUUID()
+
+        assertThatThrownBy {
+            orderService.createOrder(customerId, emptyList())
+        }.isInstanceOf(EmptyOrderException::class.java)
     }
 }
