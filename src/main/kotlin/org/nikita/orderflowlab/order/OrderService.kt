@@ -21,14 +21,7 @@ class OrderService(
             throw EmptyOrderException()
         }
 
-        val order = Order(customerId = customerId)
-
-        items.forEach {
-            order.addLine(
-                productId = it.productId!!,
-                quantity = it.quantity
-            )
-        }
+        val order = Order.create(customerId, items)
 
         return orderRepository.save(order)
     }

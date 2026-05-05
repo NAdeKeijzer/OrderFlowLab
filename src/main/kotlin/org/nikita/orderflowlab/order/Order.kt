@@ -4,6 +4,8 @@ import jakarta.persistence.*
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
+import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
+import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import java.time.Instant
 import java.util.UUID
 
@@ -62,4 +64,27 @@ class Order(
 
         status = OrderStatus.CANCELLED
     }
+
+    companion object {
+        fun create(
+            customerId: UUID,
+            items: List<CreateOrderLineRequest>
+        ): Order {
+            if (items.isEmpty()) {
+                throw EmptyOrderException()
+            }
+
+            val order = Order(customerId = customerId)
+
+            items.forEach {
+                order.addLine(
+                    productId = it.productId!!,
+                    quantity = it.quantity
+                )
+            }
+
+            return order
+        }
+    }
+
 }
