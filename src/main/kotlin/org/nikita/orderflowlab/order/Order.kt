@@ -89,4 +89,9 @@ class Order(
         }
     }
 
+    fun total(): BigDecimal {
+        return lines.fold(BigDecimal.ZERO) { acc, line ->
+            acc.add(line.total())
+        }
+    }
 }

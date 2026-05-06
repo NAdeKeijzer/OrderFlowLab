@@ -23,4 +23,9 @@ class OrderLine(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     val order: Order
-)
+
+) {
+
+    fun total(): BigDecimal =
+        unitPrice.multiply(BigDecimal(quantity))
+}

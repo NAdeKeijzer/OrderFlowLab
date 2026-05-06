@@ -23,7 +23,7 @@ class OrderTest {
                 OrderLineInput(
                     productId = productId,
                     quantity = 2,
-                    unitPrice = BigDecimal("9.99"),
+                    unitPrice = BigDecimal("9.99")
                 )
             )
         )
@@ -33,6 +33,7 @@ class OrderTest {
         assertThat(order.lines).hasSize(1)
         assertThat(order.lines.first().productId).isEqualTo(productId)
         assertThat(order.lines.first().quantity).isEqualTo(2)
+        assertThat(order.lines.first().unitPrice).isEqualTo(BigDecimal("9.99"))
     }
 
     @Test
@@ -54,7 +55,7 @@ class OrderTest {
                     OrderLineInput(
                         productId = UUID.randomUUID(),
                         quantity = 0,
-                        unitPrice = BigDecimal("9.99"),
+                        unitPrice = BigDecimal("9.99")
                     )
                 )
             )
@@ -97,6 +98,27 @@ class OrderTest {
         assertThatThrownBy {
             order.cancel()
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
+    }
+
+    @Test
+    fun `calculates order total`() {
+        val order = Order.create(
+            customerId = UUID.randomUUID(),
+            items = listOf(
+                OrderLineInput(
+                    productId = UUID.randomUUID(),
+                    quantity = 2,
+                    unitPrice = BigDecimal("10.00")
+                ),
+                OrderLineInput(
+                    productId = UUID.randomUUID(),
+                    quantity = 1,
+                    unitPrice = BigDecimal("5.00")
+                )
+            )
+        )
+
+        assertThat(order.total()).isEqualTo(BigDecimal("25.00"))
     }
 
     private fun validOrder(): Order =
