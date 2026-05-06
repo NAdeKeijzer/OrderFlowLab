@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
-data class ErrorResponse(
+data class ApiErrorResponse(
     val status: Int,
     val error: String,
     val message: String?
@@ -49,11 +49,11 @@ class ApiExceptionHandler {
     @ExceptionHandler(OrderAlreadyPaidException::class)
     fun handleOrderAlreadyPaid(
         exception: OrderAlreadyPaidException
-    ): ResponseEntity<ErrorResponse> {
+    ): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(
-                ErrorResponse(
+                ApiErrorResponse(
                     status = 409,
                     error = "Order already paid",
                     message = exception.message
@@ -64,11 +64,11 @@ class ApiExceptionHandler {
     @ExceptionHandler(PaidOrderCannotBeCancelledException::class)
     fun handlePaidOrderCannotBeCancelled(
         exception: PaidOrderCannotBeCancelledException
-    ): ResponseEntity<ErrorResponse> {
+    ): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(
-                ErrorResponse(
+                ApiErrorResponse(
                     status = 409,
                     error = "Paid order cannot be cancelled",
                     message = exception.message
@@ -79,11 +79,11 @@ class ApiExceptionHandler {
     @ExceptionHandler(InvalidOrderLineQuantityException::class)
     fun handleInvalidQuantity(
         ex: InvalidOrderLineQuantityException
-    ): ResponseEntity<ErrorResponse> {
+    ): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(
-                ErrorResponse(
+                ApiErrorResponse(
                     status = 400,
                     error = "Invalid order line quantity",
                     message = ex.message
@@ -94,11 +94,11 @@ class ApiExceptionHandler {
     @ExceptionHandler(EmptyOrderException::class)
     fun handleEmptyOrder(
         ex: EmptyOrderException
-    ): ResponseEntity<ErrorResponse> {
+    ): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(
-                ErrorResponse(
+                ApiErrorResponse(
                     status = 400,
                     error = "Empty order",
                     message = ex.message
