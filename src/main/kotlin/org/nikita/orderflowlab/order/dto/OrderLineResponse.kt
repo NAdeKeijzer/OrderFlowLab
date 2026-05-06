@@ -1,12 +1,8 @@
 package org.nikita.orderflowlab.order.dto
 
-import jakarta.validation.constraints.Min
 import java.util.UUID
 
-data class CreateOrderLineRequest(
-
+data class OrderLineResponse(
     val productId: UUID,
-
-    @field:Min(1)
     val quantity: Int
 )

@@ -28,8 +28,3 @@ data class OrderResponse(
             )
     }
 }
-
-data class OrderLineResponse(
-    val productId: UUID,
-    val quantity: Int
-)
