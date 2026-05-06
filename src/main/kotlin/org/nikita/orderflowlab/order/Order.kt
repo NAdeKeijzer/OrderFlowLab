@@ -5,6 +5,7 @@ import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import org.nikita.orderflowlab.order.exception.EmptyOrderException
+import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
@@ -34,7 +35,7 @@ class Order(
 
 ) {
 
-    fun addLine(productId: UUID, quantity: Int) {
+    fun addLine(productId: UUID, quantity: Int, unitPrice: BigDecimal) {
         if (quantity <= 0) {
             throw InvalidOrderLineQuantityException(quantity)
         }
@@ -43,6 +44,7 @@ class Order(
             OrderLine(
                 productId = productId,
                 quantity = quantity,
+                unitPrice = unitPrice,
                 order = this
             )
         )
@@ -78,7 +80,8 @@ class Order(
             items.forEach {
                 order.addLine(
                     productId = it.productId,
-                    quantity = it.quantity
+                    quantity = it.quantity,
+                    unitPrice = it.unitPrice
                 )
             }
 

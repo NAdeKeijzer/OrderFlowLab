@@ -18,7 +18,8 @@ class OrderService(
         val orderLineInputs = items.map {
             OrderLineInput(
                 productId = it.productId,
-                quantity = it.quantity
+                quantity = it.quantity,
+                unitPrice = it.unitPrice
             )
         }
 

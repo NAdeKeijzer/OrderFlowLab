@@ -11,6 +11,7 @@ import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
+import java.math.BigDecimal
 import java.util.UUID
 
 @SpringBootTest
@@ -25,7 +26,8 @@ class OrderServiceTest @Autowired constructor(
         val items = listOf(
             CreateOrderLineRequest(
                 productId = UUID.randomUUID(),
-                quantity = 2
+                quantity = 2,
+                unitPrice = BigDecimal("9.99")
             )
         )
 
@@ -43,7 +45,8 @@ class OrderServiceTest @Autowired constructor(
         val items = listOf(
             CreateOrderLineRequest(
                 productId = UUID.randomUUID(),
-                quantity = 2
+                quantity = 2,
+                unitPrice = BigDecimal("9.99")
             )
         )
 
@@ -61,7 +64,10 @@ class OrderServiceTest @Autowired constructor(
         val productId = UUID.randomUUID()
 
         val items = listOf(
-            CreateOrderLineRequest(productId = productId, quantity = 2)
+            CreateOrderLineRequest(
+                productId = productId,
+                quantity = 2,
+                unitPrice = BigDecimal("9.99"))
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -77,7 +83,10 @@ class OrderServiceTest @Autowired constructor(
         val productId = UUID.randomUUID()
 
         val items = listOf(
-            CreateOrderLineRequest(productId = productId, quantity = 2)
+            CreateOrderLineRequest(
+                productId = productId,
+                quantity = 2,
+                unitPrice = BigDecimal("9.99"))
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -93,7 +102,10 @@ class OrderServiceTest @Autowired constructor(
         val productId = UUID.randomUUID()
 
         val items = listOf(
-            CreateOrderLineRequest(productId = productId, quantity = 2)
+            CreateOrderLineRequest(
+                productId = productId,
+                quantity = 2,
+                unitPrice = BigDecimal("9.99"))
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -111,7 +123,10 @@ class OrderServiceTest @Autowired constructor(
         val productId = UUID.randomUUID()
 
         val items = listOf(
-            CreateOrderLineRequest(productId = productId, quantity = 2)
+            CreateOrderLineRequest(
+                productId = productId,
+                quantity = 2,
+                unitPrice = BigDecimal("9.99"))
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -127,7 +142,10 @@ class OrderServiceTest @Autowired constructor(
         val productId = UUID.randomUUID()
 
         val items = listOf(
-            CreateOrderLineRequest(productId = productId, quantity = 2)
+            CreateOrderLineRequest(
+                productId = productId,
+                quantity = 2,
+                unitPrice = BigDecimal("9.99"))
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -144,7 +162,10 @@ class OrderServiceTest @Autowired constructor(
         val productId = UUID.randomUUID()
 
         val items = listOf(
-            CreateOrderLineRequest(productId = productId, quantity = 0)
+            CreateOrderLineRequest(
+                productId = productId,
+                quantity = 0,
+                unitPrice = BigDecimal("9.99"))
         )
 
         assertThatThrownBy {

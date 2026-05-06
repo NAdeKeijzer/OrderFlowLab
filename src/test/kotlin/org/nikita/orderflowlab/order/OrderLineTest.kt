@@ -2,6 +2,7 @@ package org.nikita.orderflowlab.order
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.util.UUID
 
 class OrderLineTest {
@@ -13,7 +14,8 @@ class OrderLineTest {
             items = listOf(
                 OrderLineInput(
                     productId = UUID.randomUUID(),
-                    quantity = 1
+                    quantity = 1,
+                    unitPrice = BigDecimal("9.99")
                 )
             )
         )

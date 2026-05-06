@@ -1,6 +1,7 @@
 package org.nikita.orderflowlab.order
 
 import jakarta.persistence.*
+import java.math.BigDecimal
 import java.util.UUID
 
 @Entity
@@ -12,6 +13,9 @@ class OrderLine(
 
     @Column(nullable = false)
     val productId: UUID,
+
+    @Column(nullable = false)
+    val unitPrice: BigDecimal,
 
     @Column(nullable = false)
     val quantity: Int,

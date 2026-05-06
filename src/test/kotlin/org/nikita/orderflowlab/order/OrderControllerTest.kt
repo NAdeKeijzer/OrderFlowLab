@@ -34,7 +34,8 @@ class OrderControllerTest {
                   "items": [
                     {
                       "productId": "$productId",
-                      "quantity": 2
+                      "quantity": 2,
+                      "unitPrice": 9.99
                     }
                   ]
                 }
@@ -81,7 +82,8 @@ class OrderControllerTest {
                   "items": [
                     {
                       "productId": "$productId",
-                      "quantity": 2
+                      "quantity": 2,
+                      "unitPrice": 9.99
                     }
                   ]
                 }
@@ -127,7 +129,8 @@ class OrderControllerTest {
                   "items": [
                     {
                       "productId": "$productId",
-                      "quantity": 0
+                      "quantity": 0,
+                      "unitPrice": 9.99
                     }
                   ]
                 }
@@ -151,7 +154,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }
@@ -183,7 +187,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }
@@ -222,7 +227,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }
@@ -254,7 +260,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }

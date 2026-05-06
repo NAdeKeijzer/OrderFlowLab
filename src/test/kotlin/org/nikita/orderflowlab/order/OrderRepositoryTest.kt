@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager
 import org.springframework.test.context.ActiveProfiles
+import java.math.BigDecimal
 import java.util.UUID
 
 @DataJpaTest
@@ -26,7 +27,8 @@ class OrderRepositoryTest @Autowired constructor(
             items = listOf(
                 OrderLineInput(
                     productId = productId,
-                    quantity = 2
+                    quantity = 2,
+                    unitPrice = BigDecimal("9.99")
                 )
             )
         )
@@ -45,14 +47,13 @@ class OrderRepositoryTest @Autowired constructor(
 
     @Test
     fun `findAll loads orders with lines`() {
-        val productId = UUID.randomUUID()
-
         val order = Order.create(
             customerId = UUID.randomUUID(),
             items = listOf(
                 OrderLineInput(
-                    productId = productId,
-                    quantity = 2
+                    productId = UUID.randomUUID(),
+                    quantity = 2,
+                    unitPrice = BigDecimal("9.99")
                 )
             )
         )
@@ -78,7 +79,8 @@ class OrderRepositoryTest @Autowired constructor(
             items = listOf(
                 OrderLineInput(
                     productId = productId,
-                    quantity = 2
+                    quantity = 2,
+                    unitPrice = BigDecimal("9.99")
                 )
             )
         )
