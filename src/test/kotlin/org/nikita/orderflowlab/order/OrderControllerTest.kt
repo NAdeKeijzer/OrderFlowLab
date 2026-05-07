@@ -49,6 +49,9 @@ class OrderControllerTest {
                 jsonPath("$.lines") { exists() }
                 jsonPath("$.lines[0].productId") { value(productId.toString()) }
                 jsonPath("$.lines[0].quantity") { value(2) }
+                jsonPath("$.lines[0].unitPrice") { value(9.99) }
+                jsonPath("$.lines[0].lineTotal") { value(19.98) }
+                jsonPath("$.totalPrice") { value(19.98) }
             }
     }
 
