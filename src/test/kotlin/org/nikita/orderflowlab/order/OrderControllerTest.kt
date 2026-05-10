@@ -1,7 +1,7 @@
 package org.nikita.orderflowlab.order
 
-import org.junit.jupiter.api.Test
 import com.jayway.jsonpath.JsonPath
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
-import java.util.UUID
+import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,7 +34,8 @@ class OrderControllerTest {
                   "items": [
                     {
                       "productId": "$productId",
-                      "quantity": 2
+                      "quantity": 2,
+                      "unitPrice": 9.99
                     }
                   ]
                 }
@@ -48,6 +49,9 @@ class OrderControllerTest {
                 jsonPath("$.lines") { exists() }
                 jsonPath("$.lines[0].productId") { value(productId.toString()) }
                 jsonPath("$.lines[0].quantity") { value(2) }
+                jsonPath("$.lines[0].unitPrice") { value(9.99) }
+                jsonPath("$.lines[0].lineTotal") { value(19.98) }
+                jsonPath("$.totalPrice") { value(19.98) }
             }
     }
 
@@ -81,7 +85,8 @@ class OrderControllerTest {
                   "items": [
                     {
                       "productId": "$productId",
-                      "quantity": 2
+                      "quantity": 2,
+                      "unitPrice": 9.99
                     }
                   ]
                 }
@@ -127,7 +132,8 @@ class OrderControllerTest {
                   "items": [
                     {
                       "productId": "$productId",
-                      "quantity": 0
+                      "quantity": 0,
+                      "unitPrice": 9.99
                     }
                   ]
                 }
@@ -151,7 +157,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }
@@ -183,7 +190,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }
@@ -222,7 +230,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }
@@ -254,7 +263,8 @@ class OrderControllerTest {
               "items": [
                 {
                   "productId": "$productId",
-                  "quantity": 2
+                  "quantity": 2,
+                  "unitPrice": 9.99
                 }
               ]
             }

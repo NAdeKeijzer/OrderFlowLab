@@ -1,7 +1,8 @@
 package org.nikita.orderflowlab.order
 
 import jakarta.persistence.*
-import java.util.UUID
+import java.math.BigDecimal
+import java.util.*
 
 @Entity
 @Table(name = "order_lines")
@@ -14,9 +15,17 @@ class OrderLine(
     val productId: UUID,
 
     @Column(nullable = false)
+    val unitPrice: BigDecimal,
+
+    @Column(nullable = false)
     val quantity: Int,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     val order: Order
-)
+
+) {
+
+    fun total(): BigDecimal =
+        unitPrice.multiply(BigDecimal(quantity))
+}

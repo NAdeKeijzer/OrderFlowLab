@@ -2,15 +2,17 @@ package org.nikita.orderflowlab.order.dto
 
 import org.nikita.orderflowlab.order.Order
 import org.nikita.orderflowlab.order.OrderStatus
+import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 data class OrderResponse(
     val id: UUID,
     val customerId: UUID,
     val status: OrderStatus,
     val createdAt: Instant,
-    val lines: List<OrderLineResponse>
+    val lines: List<OrderLineResponse>,
+    val totalPrice: BigDecimal
 ) {
     companion object {
         fun from(order: Order): OrderResponse =
@@ -22,9 +24,12 @@ data class OrderResponse(
                 lines = order.lines.map {
                     OrderLineResponse(
                         productId = it.productId,
-                        quantity = it.quantity
+                        quantity = it.quantity,
+                        unitPrice = it.unitPrice,
+                        lineTotal = it.total()
                     )
-                }
+                },
+                totalPrice = order.total()
             )
     }
 }

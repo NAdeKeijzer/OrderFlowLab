@@ -3,7 +3,7 @@ package org.nikita.orderflowlab.order
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class OrderService(
@@ -18,7 +18,8 @@ class OrderService(
         val orderLineInputs = items.map {
             OrderLineInput(
                 productId = it.productId,
-                quantity = it.quantity
+                quantity = it.quantity,
+                unitPrice = it.unitPrice
             )
         }
 
@@ -29,6 +30,7 @@ class OrderService(
 
         return orderRepository.save(order)
     }
+
     @Transactional(readOnly = true)
     fun getOrder(id: UUID): Order? {
         return orderRepository.findById(id).orElse(null)
