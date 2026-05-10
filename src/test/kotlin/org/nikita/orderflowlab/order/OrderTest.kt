@@ -8,7 +8,7 @@ import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 class OrderTest {
 

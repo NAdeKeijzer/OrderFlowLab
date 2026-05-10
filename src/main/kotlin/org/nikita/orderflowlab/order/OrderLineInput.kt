@@ -1,7 +1,7 @@
 package org.nikita.orderflowlab.order
 
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 data class OrderLineInput(
     val productId: UUID,

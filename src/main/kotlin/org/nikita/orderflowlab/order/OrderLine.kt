@@ -2,7 +2,7 @@ package org.nikita.orderflowlab.order
 
 import jakarta.persistence.*
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "order_lines")

@@ -1,10 +1,10 @@
 spring:
-    application:
-        name: order-flow-lab
+  application:
+    name: order-flow-lab
 
-    jpa:
-        hibernate:
-            ddl-auto: validate
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
-    flyway:
-        enabled: true
+  flyway:
+    enabled: true

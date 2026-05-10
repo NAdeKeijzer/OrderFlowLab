@@ -8,7 +8,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @DataJpaTest
 @ActiveProfiles("test")

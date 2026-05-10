@@ -3,7 +3,7 @@ package org.nikita.orderflowlab.order.dto
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.Min
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 data class CreateOrderLineRequest(
 

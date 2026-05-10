@@ -1,18 +1,18 @@
 package org.nikita.orderflowlab.order
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import org.springframework.test.context.ActiveProfiles
-import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -67,7 +67,8 @@ class OrderServiceTest @Autowired constructor(
             CreateOrderLineRequest(
                 productId = productId,
                 quantity = 2,
-                unitPrice = BigDecimal("9.99"))
+                unitPrice = BigDecimal("9.99")
+            )
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -86,7 +87,8 @@ class OrderServiceTest @Autowired constructor(
             CreateOrderLineRequest(
                 productId = productId,
                 quantity = 2,
-                unitPrice = BigDecimal("9.99"))
+                unitPrice = BigDecimal("9.99")
+            )
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -105,7 +107,8 @@ class OrderServiceTest @Autowired constructor(
             CreateOrderLineRequest(
                 productId = productId,
                 quantity = 2,
-                unitPrice = BigDecimal("9.99"))
+                unitPrice = BigDecimal("9.99")
+            )
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -126,7 +129,8 @@ class OrderServiceTest @Autowired constructor(
             CreateOrderLineRequest(
                 productId = productId,
                 quantity = 2,
-                unitPrice = BigDecimal("9.99"))
+                unitPrice = BigDecimal("9.99")
+            )
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -145,7 +149,8 @@ class OrderServiceTest @Autowired constructor(
             CreateOrderLineRequest(
                 productId = productId,
                 quantity = 2,
-                unitPrice = BigDecimal("9.99"))
+                unitPrice = BigDecimal("9.99")
+            )
         )
 
         val order = orderService.createOrder(customerId, items)
@@ -165,7 +170,8 @@ class OrderServiceTest @Autowired constructor(
             CreateOrderLineRequest(
                 productId = productId,
                 quantity = 0,
-                unitPrice = BigDecimal("9.99"))
+                unitPrice = BigDecimal("9.99")
+            )
         )
 
         assertThatThrownBy {

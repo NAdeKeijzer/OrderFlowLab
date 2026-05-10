@@ -1,13 +1,13 @@
 package org.nikita.orderflowlab.order
 
 import jakarta.persistence.*
+import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
-import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "orders")
