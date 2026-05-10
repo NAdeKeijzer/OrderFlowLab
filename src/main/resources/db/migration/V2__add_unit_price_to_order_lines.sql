@@ -1,0 +1,2 @@
+ALTER TABLE order_lines
+ADD COLUMN unit_price NUMERIC(19, 2) NOT NULL DEFAULT 0.00;
