@@ -11,11 +11,14 @@ import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledExcepti
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.nikita.orderflowlab.order.event.NoOpOrderEventPublisher
+import org.springframework.context.annotation.Import
 import java.math.BigDecimal
 import java.util.*
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(NoOpOrderEventPublisher::class)
 class OrderServiceTest @Autowired constructor(
     private val orderService: OrderService
 ) {

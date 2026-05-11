@@ -3,11 +3,14 @@ package org.nikita.orderflowlab.order
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.nikita.orderflowlab.order.event.OrderCreatedEvent
+import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import java.util.*
 
 @Service
 class OrderService(
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val orderEventPublisher: OrderEventPublisher
 ) {
 
     @Transactional
@@ -28,7 +31,18 @@ class OrderService(
             items = orderLineInputs
         )
 
-        return orderRepository.save(order)
+        val savedOrder = orderRepository.save(order)
+
+        orderEventPublisher.publishOrderCreated(
+            OrderCreatedEvent(
+                orderId = savedOrder.id,
+                customerId = savedOrder.customerId,
+                totalPrice = savedOrder.total(),
+                createdAt = savedOrder.createdAt
+            )
+        )
+
+        return savedOrder
     }
 
     @Transactional(readOnly = true)
