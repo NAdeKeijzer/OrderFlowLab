@@ -1,17 +1,21 @@
 package org.nikita.orderflowlab.order.event
 
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
+import org.nikita.orderflowlab.inventory.InventoryReservationRepository
 import org.nikita.orderflowlab.inventory.InventoryReservationService
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 class OrderCreatedEventHandlerTest {
 
     @Test
     fun `handles order created event`() {
+        val repository = mock(InventoryReservationRepository::class.java)
+
         val handler = OrderCreatedEventHandler(
-            inventoryReservationService = InventoryReservationService()
+            inventoryReservationService = InventoryReservationService(repository)
         )
 
         val event = OrderCreatedEvent(
