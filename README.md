@@ -56,16 +56,29 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * JSON serialization/deserialization
 * Kafka integration via Docker
 
+### Inventory
+
+* Reserve inventory for created orders
+* Persist inventory reservations
+* Consume order events asynchronously
+
 ---
 
 # 🧱 Project Structure
 
 ```text
 src/main/kotlin/org/nikita/orderflowlab
+```text
+src/main/kotlin/org/nikita/orderflowlab
 ├── config
 │   ├── JacksonConfig.kt
 │   ├── KafkaConsumerConfig.kt
 │   └── KafkaProducerConfig.kt
+│
+├── inventory
+│   ├── InventoryReservation.kt
+│   ├── InventoryReservationRepository.kt
+│   └── InventoryReservationService.kt
 │
 ├── order
 │   ├── Order.kt
@@ -84,19 +97,29 @@ src/main/kotlin/org/nikita/orderflowlab
 │       ├── NoOpOrderEventPublisher.kt
 │       ├── OrderCreatedConsumer.kt
 │       ├── OrderCreatedEvent.kt
+│       ├── OrderCreatedEventHandler.kt
 │       └── OrderEventPublisher.kt
 │
 └── OrderFlowLabApplication.kt
+```
 ```
 
 Tests:
 
 ```text
 src/test/kotlin/org/nikita/orderflowlab
-├── OrderFlowLabApplicationTests.kt
-└── order
-    ├── OrderControllerTest.kt
-    └── OrderServiceTest.kt
+├── inventory
+│   └── InventoryReservationServiceTest.kt
+│
+├── order
+│   ├── OrderControllerTest.kt
+│   ├── OrderServiceTest.kt
+│   │
+│   └── event
+│       └── OrderCreatedEventHandlerTest.kt
+│
+└── OrderFlowLabApplicationTests.kt
+```
 ```
 
 Database migrations:
@@ -104,7 +127,9 @@ Database migrations:
 ```text
 src/main/resources/db/migration
 ├── V1__create_order_tables.sql
-└── V2__add_unit_price_to_order_lines.sql
+├── V2__add_unit_price_to_order_lines.sql
+└── V3__create_inventory_reservations.sql
+```
 ```
 
 ---
@@ -235,7 +260,13 @@ Example payload:
   "orderId": "defbdef5-cbff-418e-8195-49a4f1fc732a",
   "customerId": "11111111-1111-1111-1111-111111111111",
   "totalPrice": 25.48,
-  "createdAt": 1778501217.371128900
+  "createdAt": "2026-05-13T12:42:29Z",
+  "lines": [
+    {
+      "productId": "22222222-2222-2222-2222-222222222222",
+      "quantity": 2
+    }
+  ]
 }
 ```
 
@@ -270,12 +301,13 @@ src/main/resources/application-postgres.yml
 * Flyway database migrations
 * Integration testing with MockMvc
 * Kotlin + Spring Boot development
+* Asynchronous inventory reservation flow
+* Event consumers with persistence
 
 ---
 
 # 🔮 Possible Improvements
 
-* Inventory service integration
 * Payment service integration
 * Dead-letter queue handling
 * Kafka retries and error handling

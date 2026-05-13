@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.nikita.orderflowlab.order.event.NoOpOrderEventPublisher
 import org.springframework.context.annotation.Import
 import java.math.BigDecimal
-import java.util.*
+import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("test")

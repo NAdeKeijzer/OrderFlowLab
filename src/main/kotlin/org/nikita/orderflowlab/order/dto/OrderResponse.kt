@@ -4,7 +4,7 @@ import org.nikita.orderflowlab.order.Order
 import org.nikita.orderflowlab.order.OrderStatus
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 data class OrderResponse(
     val id: UUID,
