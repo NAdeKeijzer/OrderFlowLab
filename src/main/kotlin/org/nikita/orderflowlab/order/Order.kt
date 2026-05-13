@@ -7,7 +7,7 @@ import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @Entity
 @Table(name = "orders")

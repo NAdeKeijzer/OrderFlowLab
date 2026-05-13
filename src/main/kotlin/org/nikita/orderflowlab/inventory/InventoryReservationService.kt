@@ -10,10 +10,13 @@ class InventoryReservationService {
     private val logger = LoggerFactory.getLogger(InventoryReservationService::class.java)
 
     fun reserveFor(event: OrderCreatedEvent) {
-        logger.info(
-            "Reserved inventory for orderId={}, totalPrice={}",
-            event.orderId,
-            event.totalPrice
-        )
+        event.lines.forEach { line ->
+            logger.info(
+                "Reserved inventory for orderId={}, productId={}, quantity={}",
+                event.orderId,
+                line.productId,
+                line.quantity
+            )
+        }
     }
 }

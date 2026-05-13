@@ -5,7 +5,7 @@ import org.nikita.orderflowlab.order.dto.CreateOrderRequest
 import org.nikita.orderflowlab.order.dto.OrderResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/orders")

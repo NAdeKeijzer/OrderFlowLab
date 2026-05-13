@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.inventory.InventoryReservationService
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 class OrderCreatedEventHandlerTest {
 
@@ -18,7 +18,13 @@ class OrderCreatedEventHandlerTest {
             orderId = UUID.randomUUID(),
             customerId = UUID.randomUUID(),
             totalPrice = BigDecimal("25.48"),
-            createdAt = Instant.parse("2026-05-13T12:42:29Z")
+            createdAt = Instant.parse("2026-05-13T12:42:29Z"),
+            lines = listOf(
+                OrderCreatedLineEvent(
+                    productId = UUID.randomUUID(),
+                    quantity = 2
+                )
+            )
         )
 
         handler.handle(event)

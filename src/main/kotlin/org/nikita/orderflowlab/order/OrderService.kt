@@ -1,11 +1,12 @@
 package org.nikita.orderflowlab.order
 
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
+import org.nikita.orderflowlab.order.event.OrderCreatedEvent
+import org.nikita.orderflowlab.order.event.OrderCreatedLineEvent
+import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.nikita.orderflowlab.order.event.OrderCreatedEvent
-import org.nikita.orderflowlab.order.event.OrderEventPublisher
-import java.util.*
+import java.util.UUID
 
 @Service
 class OrderService(
@@ -38,10 +39,15 @@ class OrderService(
                 orderId = savedOrder.id,
                 customerId = savedOrder.customerId,
                 totalPrice = savedOrder.total(),
-                createdAt = savedOrder.createdAt
+                createdAt = savedOrder.createdAt,
+                lines = savedOrder.lines.map {
+                    OrderCreatedLineEvent(
+                        productId = it.productId,
+                        quantity = it.quantity
+                    )
+                }
             )
         )
-
         return savedOrder
     }
 

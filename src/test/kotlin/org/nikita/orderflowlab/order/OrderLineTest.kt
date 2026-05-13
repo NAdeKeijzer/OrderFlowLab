@@ -3,7 +3,7 @@ package org.nikita.orderflowlab.order
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.util.*
+import java.util.UUID
 
 class OrderLineTest {
 
