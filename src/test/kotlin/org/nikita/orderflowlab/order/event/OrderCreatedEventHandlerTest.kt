@@ -1,6 +1,7 @@
 package org.nikita.orderflowlab.order.event
 
 import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.inventory.InventoryReservationService
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
@@ -9,7 +10,9 @@ class OrderCreatedEventHandlerTest {
 
     @Test
     fun `handles order created event`() {
-        val handler = OrderCreatedEventHandler()
+        val handler = OrderCreatedEventHandler(
+            inventoryReservationService = InventoryReservationService()
+        )
 
         val event = OrderCreatedEvent(
             orderId = UUID.randomUUID(),
