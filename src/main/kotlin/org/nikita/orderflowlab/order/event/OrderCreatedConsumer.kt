@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("postgres")
-class OrderCreatedConsumer {
+class OrderCreatedConsumer(
+    private val handler: OrderCreatedEventHandler
+) {
 
     @KafkaListener(
         topics = ["order.created"],
@@ -14,6 +16,6 @@ class OrderCreatedConsumer {
         containerFactory = "orderCreatedEventKafkaListenerContainerFactory"
     )
     fun consume(event: OrderCreatedEvent) {
-        println("Received order event: $event")
+        handler.handle(event)
     }
 }
