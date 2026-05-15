@@ -1,6 +1,6 @@
 package org.nikita.orderflowlab.order.event
 
-import org.nikita.orderflowlab.inventory.InventoryReservationService
+import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

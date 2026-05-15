@@ -1,5 +1,10 @@
-package org.nikita.orderflowlab.inventory
+package org.nikita.orderflowlab.inventory.service
 
+import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
+import org.nikita.orderflowlab.inventory.repository.InventoryReservationRepository
+import org.nikita.orderflowlab.inventory.exception.InsufficientInventoryException
+import org.nikita.orderflowlab.inventory.exception.InventoryItemNotFoundException
+import org.nikita.orderflowlab.inventory.model.InventoryReservation
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
