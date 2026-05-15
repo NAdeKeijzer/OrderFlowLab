@@ -59,6 +59,47 @@ class OrderControllerTest {
     }
 
     @Test
+    fun `gets order by id`() {
+        val customerId = UUID.randomUUID()
+        val productId = UUID.randomUUID()
+
+        val createResponse = mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+            {
+              "customerId": "$customerId",
+              "items": [
+                {
+                  "productId": "$productId",
+                  "quantity": 2,
+                  "unitPrice": 9.99
+                }
+              ]
+            }
+        """.trimIndent()
+        }.andReturn()
+
+        val id = JsonPath.read<String>(
+            createResponse.response.contentAsString,
+            "$.id"
+        )
+
+        mockMvc.get("/orders/$id")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.id") { value(id) }
+                jsonPath("$.customerId") { value(customerId.toString()) }
+                jsonPath("$.status") { value("CREATED") }
+                jsonPath("$.lines") { exists() }
+                jsonPath("$.lines[0].productId") { value(productId.toString()) }
+                jsonPath("$.lines[0].quantity") { value(2) }
+                jsonPath("$.lines[0].unitPrice") { value(9.99) }
+                jsonPath("$.lines[0].lineTotal") { value(19.98) }
+                jsonPath("$.totalPrice") { value(19.98) }
+            }
+    }
+
+    @Test
     fun `gets all orders`() {
         mockMvc.get("/orders")
             .andExpect {
