@@ -7,7 +7,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InventoryReservationService(
-    private val inventoryReservationRepository: InventoryReservationRepository
+    private val inventoryReservationRepository: InventoryReservationRepository,
+    private val inventoryItemRepository: InventoryItemRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(InventoryReservationService::class.java)
@@ -15,13 +16,28 @@ class InventoryReservationService(
     @Transactional
     fun reserveFor(event: OrderCreatedEvent) {
         event.lines.forEach { line ->
-            val reservation = InventoryReservation(
-                orderId = event.orderId,
-                productId = line.productId,
-                quantity = line.quantity
-            )
+            val inventoryItem = inventoryItemRepository.findById(line.productId)
+                .orElseThrow {
+                    InventoryItemNotFoundException(line.productId)
+                }
 
-            inventoryReservationRepository.save(reservation)
+            if (inventoryItem.availableQuantity < line.quantity) {
+                throw InsufficientInventoryException(
+                    productId = line.productId,
+                    requestedQuantity = line.quantity,
+                    availableQuantity = inventoryItem.availableQuantity
+                )
+            }
+
+            inventoryItem.availableQuantity -= line.quantity
+
+            inventoryReservationRepository.save(
+                InventoryReservation(
+                    orderId = event.orderId,
+                    productId = line.productId,
+                    quantity = line.quantity
+                )
+            )
 
             logger.info(
                 "Reserved inventory for orderId={}, productId={}, quantity={}",
