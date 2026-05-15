@@ -1,6 +1,6 @@
-package org.nikita.orderflowlab.inventory
+package org.nikita.orderflowlab.inventory.exception
 
-import java.util.UUID
+import java.util.*
 
 class InventoryItemNotFoundException(
     productId: UUID

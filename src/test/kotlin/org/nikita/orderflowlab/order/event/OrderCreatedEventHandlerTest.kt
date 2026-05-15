@@ -3,7 +3,7 @@ package org.nikita.orderflowlab.order.event
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.nikita.orderflowlab.inventory.InventoryReservationService
+import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.*

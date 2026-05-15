@@ -1,6 +1,6 @@
 package org.nikita.orderflowlab.inventory.dto
 
-import org.nikita.orderflowlab.inventory.InventoryItem
+import org.nikita.orderflowlab.inventory.model.InventoryItem
 import java.time.Instant
 import java.util.UUID
 
