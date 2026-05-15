@@ -58,9 +58,11 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 
 ### Inventory
 
-* Reserve inventory for created orders
-* Persist inventory reservations
-* Consume order events asynchronously
+* Create inventory items
+* Retrieve inventory items
+* Reserve stock when orders are created
+* Prevent reservation when inventory is missing
+* Inventory updates are transactional
 
 ---
 
@@ -76,9 +78,20 @@ src/main/kotlin/org/nikita/orderflowlab
 │   └── KafkaProducerConfig.kt
 │
 ├── inventory
+│   ├── InventoryController.kt
+│   ├── InventoryItem.kt
+│   ├── InventoryItemRepository.kt
 │   ├── InventoryReservation.kt
 │   ├── InventoryReservationRepository.kt
-│   └── InventoryReservationService.kt
+│   ├── InventoryReservationService.kt
+│   │
+│   ├── dto
+│   │   ├── CreateInventoryItemRequest.kt
+│   │   └── InventoryItemResponse.kt
+│   │
+│   └── exception
+│       ├── InsufficientInventoryException.kt
+│       └── InventoryItemNotFoundException.kt
 │
 ├── order
 │   ├── Order.kt
@@ -128,7 +141,8 @@ Database migrations:
 src/main/resources/db/migration
 ├── V1__create_order_tables.sql
 ├── V2__add_unit_price_to_order_lines.sql
-└── V3__create_inventory_reservations.sql
+├── V3__create_inventory_reservations.sql
+└── V4__create_inventory_items.sql
 ```
 ```
 
@@ -180,6 +194,8 @@ http://localhost:8080
 ---
 
 # 🔍 Example API Usage
+
+# 📦 Order API
 
 ## Create Order
 
@@ -242,6 +258,51 @@ Invoke-RestMethod `
   -Uri "http://localhost:8080/orders/{id}/cancel" `
   -Method Patch
 ```
+
+---
+
+# 📦 Inventory API
+
+## Create or Update Inventory Item
+
+Creates a new inventory item, or updates the available quantity when the product already exists.
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://localhost:8080/inventory-items" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body '{
+    "productId": "22222222-2222-2222-2222-222222222222",
+    "availableQuantity": 10
+  }'
+```
+
+---
+
+## Get Inventory Item
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://localhost:8080/inventory-items/22222222-2222-2222-2222-222222222222"
+```
+
+---
+
+## Inventory Reservation Flow
+
+When an order is created, inventory is reserved asynchronously through Kafka.
+
+Example flow:
+
+1. Create an inventory item with quantity `10`
+2. Create an order for quantity `2`
+3. `OrderCreatedEvent` is published to Kafka
+4. `OrderCreatedConsumer` receives the event
+5. `InventoryReservationService` creates an inventory reservation
+6. Available quantity is reduced from `10` to `8`
+
+Important: inventory must exist for all products in the order. If one product is missing or has insufficient stock, the reservation transaction is rolled back.
 
 ---
 
