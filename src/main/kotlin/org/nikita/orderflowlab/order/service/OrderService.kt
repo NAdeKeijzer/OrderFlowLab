@@ -1,12 +1,16 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.service
 
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedLineEvent
 import org.nikita.orderflowlab.order.event.OrderEventPublisher
+import org.nikita.orderflowlab.order.exception.OrderNotFoundException
+import org.nikita.orderflowlab.order.model.Order
+import org.nikita.orderflowlab.order.model.OrderLineInput
+import org.nikita.orderflowlab.order.repository.OrderRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class OrderService(
@@ -52,19 +56,19 @@ class OrderService(
     }
 
     @Transactional(readOnly = true)
-    fun getOrder(id: UUID): Order? {
-        return orderRepository.findById(id).orElse(null)
+    fun getOrder(id: UUID): Order {
+        return orderRepository.findById(id)
+            .orElseThrow { OrderNotFoundException(id) }
     }
 
     @Transactional(readOnly = true)
     fun getAll(): List<Order> {
         return orderRepository.findAll()
     }
-
     @Transactional
-    fun markAsPaid(id: UUID): Order {
+    fun pay(id: UUID): Order {
         val order = orderRepository.findById(id)
-            .orElseThrow { RuntimeException("Order not found") }
+            .orElseThrow { OrderNotFoundException(id) }
 
         order.markAsPaid()
 
@@ -72,12 +76,13 @@ class OrderService(
     }
 
     @Transactional
-    fun cancelOrder(id: UUID): Order {
+    fun cancel(id: UUID): Order {
         val order = orderRepository.findById(id)
-            .orElseThrow { RuntimeException("Order not found") }
+            .orElseThrow { OrderNotFoundException(id) }
 
         order.cancel()
 
         return orderRepository.save(order)
     }
+
 }

@@ -1,9 +1,9 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.repository
 
+import org.nikita.orderflowlab.order.model.Order
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
-import java.util.UUID
-import java.util.Optional
+import java.util.*
 
 interface OrderRepository : JpaRepository<Order, UUID> {
 

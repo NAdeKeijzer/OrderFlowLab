@@ -1,9 +1,6 @@
 package org.nikita.orderflowlab.common
 
-import org.nikita.orderflowlab.order.exception.EmptyOrderException
-import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
-import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
-import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
+import org.nikita.orderflowlab.order.exception.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -45,6 +42,12 @@ class ApiExceptionHandler {
                 )
             )
     }
+
+    @ExceptionHandler(OrderNotFoundException::class)
+    fun handleOrderNotFound(
+        ex: OrderNotFoundException
+    ): ResponseEntity<Unit> =
+        ResponseEntity.notFound().build()
 
     @ExceptionHandler(OrderAlreadyPaidException::class)
     fun handleOrderAlreadyPaid(

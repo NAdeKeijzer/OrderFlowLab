@@ -1,4 +1,4 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.api
 
 import com.jayway.jsonpath.JsonPath
 import org.junit.jupiter.api.Test
