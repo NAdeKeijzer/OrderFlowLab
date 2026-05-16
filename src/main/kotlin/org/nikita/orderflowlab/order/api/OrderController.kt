@@ -1,11 +1,12 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.api
 
 import jakarta.validation.Valid
 import org.nikita.orderflowlab.order.dto.CreateOrderRequest
 import org.nikita.orderflowlab.order.dto.OrderResponse
+import org.nikita.orderflowlab.order.service.OrderService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/orders")
@@ -26,13 +27,13 @@ class OrderController(
 
     @PatchMapping("/{id}/pay")
     fun payOrder(@PathVariable id: UUID): ResponseEntity<OrderResponse> {
-        val order = orderService.markAsPaid(id)
+        val order = orderService.pay(id)
         return ResponseEntity.ok(OrderResponse.from(order))
     }
 
     @PatchMapping("/{id}/cancel")
     fun cancelOrder(@PathVariable id: UUID): ResponseEntity<OrderResponse> {
-        val order = orderService.cancelOrder(id)
+        val order = orderService.cancel(id)
         return ResponseEntity.ok(OrderResponse.from(order))
     }
 

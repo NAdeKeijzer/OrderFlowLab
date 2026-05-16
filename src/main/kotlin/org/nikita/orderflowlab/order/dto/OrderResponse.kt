@@ -1,7 +1,7 @@
 package org.nikita.orderflowlab.order.dto
 
-import org.nikita.orderflowlab.order.Order
-import org.nikita.orderflowlab.order.OrderStatus
+import org.nikita.orderflowlab.order.model.Order
+import org.nikita.orderflowlab.order.model.OrderStatus
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID

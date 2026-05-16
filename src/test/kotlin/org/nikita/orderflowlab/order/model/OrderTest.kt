@@ -1,14 +1,13 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.model
 
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.order.exception.EmptyOrderException
 import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
 import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 class OrderTest {
 
@@ -28,17 +27,17 @@ class OrderTest {
             )
         )
 
-        assertThat(order.customerId).isEqualTo(customerId)
-        assertThat(order.status).isEqualTo(OrderStatus.CREATED)
-        assertThat(order.lines).hasSize(1)
-        assertThat(order.lines.first().productId).isEqualTo(productId)
-        assertThat(order.lines.first().quantity).isEqualTo(2)
-        assertThat(order.lines.first().unitPrice).isEqualTo(BigDecimal("9.99"))
+        Assertions.assertThat(order.customerId).isEqualTo(customerId)
+        Assertions.assertThat(order.status).isEqualTo(OrderStatus.CREATED)
+        Assertions.assertThat(order.lines).hasSize(1)
+        Assertions.assertThat(order.lines.first().productId).isEqualTo(productId)
+        Assertions.assertThat(order.lines.first().quantity).isEqualTo(2)
+        Assertions.assertThat(order.lines.first().unitPrice).isEqualTo(BigDecimal("9.99"))
     }
 
     @Test
     fun `rejects empty order`() {
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             Order.create(
                 customerId = UUID.randomUUID(),
                 items = emptyList()
@@ -48,7 +47,7 @@ class OrderTest {
 
     @Test
     fun `rejects order line with invalid quantity`() {
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             Order.create(
                 customerId = UUID.randomUUID(),
                 items = listOf(
@@ -68,7 +67,7 @@ class OrderTest {
 
         order.markAsPaid()
 
-        assertThat(order.status).isEqualTo(OrderStatus.PAID)
+        Assertions.assertThat(order.status).isEqualTo(OrderStatus.PAID)
     }
 
     @Test
@@ -76,7 +75,7 @@ class OrderTest {
         val order = validOrder()
         order.markAsPaid()
 
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             order.markAsPaid()
         }.isInstanceOf(OrderAlreadyPaidException::class.java)
     }
@@ -87,7 +86,7 @@ class OrderTest {
 
         order.cancel()
 
-        assertThat(order.status).isEqualTo(OrderStatus.CANCELLED)
+        Assertions.assertThat(order.status).isEqualTo(OrderStatus.CANCELLED)
     }
 
     @Test
@@ -95,7 +94,7 @@ class OrderTest {
         val order = validOrder()
         order.markAsPaid()
 
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             order.cancel()
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
     }
@@ -118,7 +117,7 @@ class OrderTest {
             )
         )
 
-        assertThat(order.total()).isEqualTo(BigDecimal("25.00"))
+        Assertions.assertThat(order.total()).isEqualTo(BigDecimal("25.00"))
     }
 
     private fun validOrder(): Order =

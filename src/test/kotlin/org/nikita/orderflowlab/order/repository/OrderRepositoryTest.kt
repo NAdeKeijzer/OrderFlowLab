@@ -1,14 +1,15 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.repository
 
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.order.model.Order
+import org.nikita.orderflowlab.order.model.OrderLineInput
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -40,9 +41,9 @@ class OrderRepositoryTest @Autowired constructor(
 
         val foundOrder = orderRepository.findById(savedOrder.id).orElseThrow()
 
-        assertThat(foundOrder.id).isEqualTo(savedOrder.id)
-        assertThat(foundOrder.lines).hasSize(1)
-        assertThat(foundOrder.lines.first().productId).isEqualTo(productId)
+        Assertions.assertThat(foundOrder.id).isEqualTo(savedOrder.id)
+        Assertions.assertThat(foundOrder.lines).hasSize(1)
+        Assertions.assertThat(foundOrder.lines.first().productId).isEqualTo(productId)
     }
 
     @Test
@@ -65,8 +66,8 @@ class OrderRepositoryTest @Autowired constructor(
 
         val orders = orderRepository.findAll()
 
-        assertThat(orders).isNotEmpty
-        assertThat(orders.first().lines).isNotEmpty
+        Assertions.assertThat(orders).isNotEmpty
+        Assertions.assertThat(orders.first().lines).isNotEmpty
     }
 
     @Test
@@ -92,7 +93,7 @@ class OrderRepositoryTest @Autowired constructor(
 
         val foundOrder = orderRepository.findById(savedOrder.id).orElseThrow()
 
-        assertThatCode {
+        Assertions.assertThatCode {
             foundOrder.lines.first().productId
         }.doesNotThrowAnyException()
     }

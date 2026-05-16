@@ -1,9 +1,9 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.model
 
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 class OrderLineTest {
 
@@ -22,8 +22,8 @@ class OrderLineTest {
 
         val line = order.lines.first()
 
-        assertThat(line.productId).isNotNull()
-        assertThat(line.quantity).isEqualTo(1)
-        assertThat(line.order).isEqualTo(order)
+        Assertions.assertThat(line.productId).isNotNull()
+        Assertions.assertThat(line.quantity).isEqualTo(1)
+        Assertions.assertThat(line.order).isEqualTo(order)
     }
 }

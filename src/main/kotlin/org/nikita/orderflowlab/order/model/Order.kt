@@ -1,4 +1,4 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.model
 
 import jakarta.persistence.*
 import org.nikita.orderflowlab.order.exception.EmptyOrderException
