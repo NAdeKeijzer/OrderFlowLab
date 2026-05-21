@@ -76,6 +76,16 @@ class OrderService(
     }
 
     @Transactional
+    fun markInventoryFailed(id: UUID): Order {
+        val order = orderRepository.findById(id)
+            .orElseThrow { OrderNotFoundException(id) }
+
+        order.markInventoryFailed()
+
+        return orderRepository.save(order)
+    }
+
+    @Transactional
     fun cancel(id: UUID): Order {
         val order = orderRepository.findById(id)
             .orElseThrow { OrderNotFoundException(id) }

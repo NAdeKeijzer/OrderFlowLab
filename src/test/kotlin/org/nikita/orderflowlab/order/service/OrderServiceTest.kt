@@ -6,17 +6,13 @@ import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.nikita.orderflowlab.order.event.OrderEventPublisher
-import org.nikita.orderflowlab.order.exception.EmptyOrderException
-import org.nikita.orderflowlab.order.exception.InvalidOrderLineQuantityException
-import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
-import org.nikita.orderflowlab.order.exception.OrderNotFoundException
-import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
+import org.nikita.orderflowlab.order.exception.*
 import org.nikita.orderflowlab.order.model.OrderStatus
 import org.nikita.orderflowlab.order.repository.OrderRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @DataJpaTest
 class OrderServiceTest @Autowired constructor(
@@ -109,6 +105,18 @@ class OrderServiceTest @Autowired constructor(
     }
 
     @Test
+    fun `can mark order as inventory failed`() {
+        val order = orderService.createOrder(
+            customerId = UUID.randomUUID(),
+            items = listOf(validOrderLineRequest())
+        )
+
+        val failedOrder = orderService.markInventoryFailed(order.id)
+
+        assertThat(failedOrder.status).isEqualTo(OrderStatus.INVENTORY_FAILED)
+    }
+
+    @Test
     fun `cannot pay an order twice`() {
         val order = orderService.createOrder(
             customerId = UUID.randomUUID(),
@@ -147,6 +155,8 @@ class OrderServiceTest @Autowired constructor(
             orderService.cancel(order.id)
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
     }
+
+
 
     private fun validOrderLineRequest(
         productId: UUID = UUID.randomUUID(),
