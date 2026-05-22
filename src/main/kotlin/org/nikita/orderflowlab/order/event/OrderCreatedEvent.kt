@@ -2,7 +2,7 @@ package org.nikita.orderflowlab.order.event
 
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 data class OrderCreatedEvent(
     val orderId: UUID,

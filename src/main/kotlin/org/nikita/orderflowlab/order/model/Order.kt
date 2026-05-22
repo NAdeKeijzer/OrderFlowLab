@@ -58,6 +58,10 @@ class Order(
         status = OrderStatus.PAID
     }
 
+    fun markInventoryFailed() {
+        status = OrderStatus.INVENTORY_FAILED
+    }
+
     fun cancel() {
         if (status == OrderStatus.PAID) {
             throw PaidOrderCannotBeCancelledException(id)

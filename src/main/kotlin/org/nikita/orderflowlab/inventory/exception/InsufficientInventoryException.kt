@@ -1,11 +1,11 @@
 package org.nikita.orderflowlab.inventory.exception
 
-import java.util.*
+import java.util.UUID
 
 class InsufficientInventoryException(
     productId: UUID,
     requestedQuantity: Int,
     availableQuantity: Int
-) : RuntimeException(
+) : InventoryDomainException(
     "Insufficient inventory for product $productId. Requested=$requestedQuantity, available=$availableQuantity"
 )
