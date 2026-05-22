@@ -4,4 +4,4 @@ import java.util.*
 
 class InventoryItemNotFoundException(
     productId: UUID
-) : RuntimeException("Inventory item not found for product $productId")
+) : InventoryDomainException("Inventory item not found for product $productId")
