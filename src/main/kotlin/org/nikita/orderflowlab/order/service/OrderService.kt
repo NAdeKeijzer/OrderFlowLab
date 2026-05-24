@@ -52,33 +52,31 @@ class OrderService(
                 }
             )
         )
+
         return savedOrder
     }
 
     @Transactional(readOnly = true)
-    fun getOrder(id: UUID): Order {
-        return orderRepository.findById(id)
+    fun getOrder(id: UUID): Order =
+        orderRepository.findById(id)
             .orElseThrow { OrderNotFoundException(id) }
-    }
 
     @Transactional(readOnly = true)
-    fun getAll(): List<Order> {
-        return orderRepository.findAll()
-    }
-    @Transactional
-    fun pay(id: UUID): Order {
-        val order = orderRepository.findById(id)
-            .orElseThrow { OrderNotFoundException(id) }
+    fun getAll(): List<Order> =
+        orderRepository.findAll()
 
-        order.markAsPaid()
+    @Transactional
+    fun markInventoryReserved(id: UUID): Order {
+        val order = getOrder(id)
+
+        order.markInventoryReserved()
 
         return orderRepository.save(order)
     }
 
     @Transactional
     fun markInventoryFailed(id: UUID): Order {
-        val order = orderRepository.findById(id)
-            .orElseThrow { OrderNotFoundException(id) }
+        val order = getOrder(id)
 
         order.markInventoryFailed()
 
@@ -86,13 +84,29 @@ class OrderService(
     }
 
     @Transactional
+    fun confirm(id: UUID): Order {
+        val order = getOrder(id)
+
+        order.confirm()
+
+        return orderRepository.save(order)
+    }
+
+    @Transactional
+    fun pay(id: UUID): Order {
+        val order = getOrder(id)
+
+        order.markAsPaid()
+
+        return orderRepository.save(order)
+    }
+
+    @Transactional
     fun cancel(id: UUID): Order {
-        val order = orderRepository.findById(id)
-            .orElseThrow { OrderNotFoundException(id) }
+        val order = getOrder(id)
 
         order.cancel()
 
         return orderRepository.save(order)
     }
-
 }
