@@ -18,5 +18,17 @@ class InventoryItem(
     var availableQuantity: Int,
 
     @Column(nullable = false)
-    val updatedAt: Instant = Instant.now()
-)
+    var updatedAt: Instant = Instant.now()
+
+) {
+
+    fun decreaseAvailableQuantity(quantity: Int) {
+        availableQuantity -= quantity
+        updatedAt = Instant.now()
+    }
+
+    fun increaseAvailableQuantity(quantity: Int) {
+        availableQuantity += quantity
+        updatedAt = Instant.now()
+    }
+}

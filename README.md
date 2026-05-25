@@ -255,6 +255,8 @@ Invoke-RestMethod `
 
 ## Cancel Order
 
+Cancels an order. When the order has successfully reserved inventory, cancelling the order also releases the inventory reservation and increases the available stock again.
+
 ```powershell
 Invoke-RestMethod `
   -Uri "http://localhost:8080/orders/{id}/cancel" `
@@ -292,22 +294,23 @@ Invoke-RestMethod `
 ---
 
 ## Inventory Reservation Flow
-
 When an order is created, inventory is reserved asynchronously through Kafka.
 
-Example flow:
+Successful flow:
 
-1. Create an inventory item with quantity `10`
-2. Create an order for quantity `2`
-3. `OrderCreatedEvent` is published to Kafka
-4. `OrderCreatedConsumer` receives the event
-5. `InventoryReservationService` creates an inventory reservation
-6. Available quantity is reduced from `10` to `8`
+1. Create inventory items for all ordered products.
+2. Create an order.
+3. `OrderCreatedEvent` is published to Kafka.
+4. `OrderCreatedConsumer` receives the event.
+5. `InventoryReservationService` creates inventory reservations.
+6. Available inventory quantities are reduced.
 7. Order status transitions:
 
 ```text
 CREATED → INVENTORY_RESERVED → CONFIRMED
 ```
+
+Failure flow:
 
 If inventory is missing or insufficient:
 
@@ -318,6 +321,38 @@ CREATED → INVENTORY_FAILED
 Inventory reservation is transactional:
 - reservations are rolled back on failure
 - inventory quantities remain unchanged
+
+Cancellation flow:
+
+```text
+CONFIRMED → CANCELLED
+```
+
+When a confirmed order is canceled:
+- inventory reservations for the order are released
+- available inventory quantities are increased again
+- reservation records are removed
+
+---
+
+## Manual Flow Checks
+
+### Successful reservation and cancellation
+
+1. Create inventory items for all products in the order.
+2. Create an order.
+3. Retrieve the order and verify the status is `CONFIRMED`.
+4. Retrieve the inventory items and verify quantities are reduced.
+5. Cancel the order.
+6. Retrieve the order and verify the status is `CANCELLED`.
+7. Retrieve the inventory items again and verify quantities are restored.
+
+### Failed reservation
+
+1. Create an inventory item with insufficient quantity, or do not create inventory for one of the products.
+2. Create an order.
+3. Retrieve the order and verify the status is `INVENTORY_FAILED`.
+4. Verify inventory quantities remain unchanged.
 
 ---
 
@@ -379,6 +414,7 @@ src/main/resources/application-postgres.yml
 * Asynchronous inventory reservation flow
 * Saga-style workflow handling
 * Transactional inventory reservation
+* Compensation logic for order cancellation
 * Failure handling in asynchronous flows
 * Event consumers with persistence
 * Flyway database migrations
@@ -390,7 +426,6 @@ src/main/resources/application-postgres.yml
 
 # 🔮 Possible Improvements
 
-* Compensation events for cancellations
 * Distributed saga orchestration
 * Optimistic locking for inventory concurrency
 * Payment-driven order confirmation

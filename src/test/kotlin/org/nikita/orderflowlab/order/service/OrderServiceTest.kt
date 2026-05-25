@@ -3,6 +3,9 @@ package org.nikita.orderflowlab.order.service
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.nikita.orderflowlab.order.event.OrderEventPublisher
@@ -18,6 +21,7 @@ import java.util.*
 class OrderServiceTest @Autowired constructor(
     private val orderRepository: OrderRepository
 ) {
+    private val inventoryReservationService = mock(InventoryReservationService::class.java)
 
     private val orderService = OrderService(
         orderRepository = orderRepository,
@@ -25,7 +29,8 @@ class OrderServiceTest @Autowired constructor(
             override fun publishOrderCreated(event: OrderCreatedEvent) {
                 // no-op for service tests
             }
-        }
+        },
+        inventoryReservationService = inventoryReservationService
     )
 
     @Test
@@ -165,6 +170,7 @@ class OrderServiceTest @Autowired constructor(
         val cancelledOrder = orderService.cancel(order.id)
 
         assertThat(cancelledOrder.status).isEqualTo(OrderStatus.CANCELLED)
+        verify(inventoryReservationService).releaseFor(order.id)
     }
 
     @Test
@@ -180,8 +186,6 @@ class OrderServiceTest @Autowired constructor(
             orderService.cancel(order.id)
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
     }
-
-
 
     private fun validOrderLineRequest(
         productId: UUID = UUID.randomUUID(),
