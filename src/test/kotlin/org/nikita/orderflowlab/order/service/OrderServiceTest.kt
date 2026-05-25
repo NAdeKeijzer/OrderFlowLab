@@ -61,8 +61,33 @@ class OrderServiceTest @Autowired constructor(
 
         val foundOrder = orderService.getOrder(order.id)
 
-        assertThat(foundOrder).isNotNull
-        assertThat(foundOrder!!.id).isEqualTo(order.id)
+        assertThat(foundOrder.id).isEqualTo(order.id)
+    }
+
+    @Test
+    fun `can mark order as inventory reserved`() {
+        val order = orderService.createOrder(
+            customerId = UUID.randomUUID(),
+            items = listOf(validOrderLineRequest())
+        )
+
+        val updatedOrder = orderService.markInventoryReserved(order.id)
+
+        assertThat(updatedOrder.status).isEqualTo(OrderStatus.INVENTORY_RESERVED)
+    }
+
+    @Test
+    fun `can confirm order`() {
+        val order = orderService.createOrder(
+            customerId = UUID.randomUUID(),
+            items = listOf(validOrderLineRequest())
+        )
+
+        orderService.markInventoryReserved(order.id)
+
+        val confirmedOrder = orderService.confirm(order.id)
+
+        assertThat(confirmedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
     }
 
     @Test

@@ -30,6 +30,9 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * Retrieve order by id
 * Pay orders
 * Cancel orders
+* Handle asynchronous inventory reservation
+* Confirm orders after successful inventory reservation
+* Mark orders as failed when inventory reservation fails
 
 ### Validation
 
@@ -62,6 +65,8 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * Retrieve inventory items
 * Reserve stock when orders are created
 * Prevent reservation when inventory is missing
+* Prevent reservation when stock is insufficient
+* Reduce available stock after reservation
 * Inventory updates are transactional
 
 ---
@@ -70,69 +75,67 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 
 ```text
 src/main/kotlin/org/nikita/orderflowlab
-```text
-src/main/kotlin/org/nikita/orderflowlab
+│   OrderFlowLabApplication.kt
+│
+├── common
+│   └── ApiExceptionHandler.kt
+│
 ├── config
 │   ├── JacksonConfig.kt
 │   ├── KafkaConsumerConfig.kt
 │   └── KafkaProducerConfig.kt
 │
 ├── inventory
-│   ├── InventoryController.kt
-│   ├── InventoryItem.kt
-│   ├── InventoryItemRepository.kt
-│   ├── InventoryReservation.kt
-│   ├── InventoryReservationRepository.kt
-│   ├── InventoryReservationService.kt
-│   │
+│   ├── api
 │   ├── dto
-│   │   ├── CreateInventoryItemRequest.kt
-│   │   └── InventoryItemResponse.kt
-│   │
-│   └── exception
-│       ├── InsufficientInventoryException.kt
-│       └── InventoryItemNotFoundException.kt
+│   ├── exception
+│   ├── model
+│   ├── repository
+│   └── service
 │
-├── order
-│   ├── Order.kt
-│   ├── OrderController.kt
-│   ├── OrderRepository.kt
-│   ├── OrderService.kt
-│   ├── OrderStatus.kt
-│   │
-│   ├── dto
-│   │   ├── CreateOrderRequest.kt
-│   │   ├── CreateOrderLineRequest.kt
-│   │   └── OrderResponse.kt
-│   │
-│   └── event
-│       ├── KafkaOrderEventPublisher.kt
-│       ├── NoOpOrderEventPublisher.kt
-│       ├── OrderCreatedConsumer.kt
-│       ├── OrderCreatedEvent.kt
-│       ├── OrderCreatedEventHandler.kt
-│       └── OrderEventPublisher.kt
-│
-└── OrderFlowLabApplication.kt
+└── order
+    ├── api
+    ├── dto
+    ├── event
+    ├── exception
+    ├── model
+    ├── repository
+    └── service
 ```
-```
+
+The project is organized by domain (`order`, `inventory`) and layered by responsibility (`api`, `service`, `repository`, `model`, etc.).
 
 Tests:
 
 ```text
 src/test/kotlin/org/nikita/orderflowlab
+│   OrderFlowLabApplicationTests.kt
+│
 ├── inventory
-│   └── InventoryReservationServiceTest.kt
+│   ├── InventoryControllerTest.kt
+│   ├── InventoryReservationServiceTest.kt
+│   └── InventoryServiceTest.kt
 │
-├── order
-│   ├── OrderControllerTest.kt
-│   ├── OrderServiceTest.kt
-│   │
-│   └── event
-│       └── OrderCreatedEventHandlerTest.kt
-│
-└── OrderFlowLabApplicationTests.kt
-```
+└── order
+    │   OrderInventoryFailureFlowTest.kt
+    │   OrderInventorySuccessFlowTest.kt
+    │
+    ├── api
+    │   └── OrderControllerTest.kt
+    │
+    ├── event
+    │   ├── NoOpOrderEventPublisher.kt
+    │   └── OrderCreatedEventHandlerTest.kt
+    │
+    ├── model
+    │   ├── OrderLineTest.kt
+    │   └── OrderTest.kt
+    │
+    ├── repository
+    │   └── OrderRepositoryTest.kt
+    │
+    └── service
+        └── OrderServiceTest.kt
 ```
 
 Database migrations:
@@ -143,7 +146,6 @@ src/main/resources/db/migration
 ├── V2__add_unit_price_to_order_lines.sql
 ├── V3__create_inventory_reservations.sql
 └── V4__create_inventory_items.sql
-```
 ```
 
 ---
@@ -301,8 +303,21 @@ Example flow:
 4. `OrderCreatedConsumer` receives the event
 5. `InventoryReservationService` creates an inventory reservation
 6. Available quantity is reduced from `10` to `8`
+7. Order status transitions:
 
-Important: inventory must exist for all products in the order. If one product is missing or has insufficient stock, the reservation transaction is rolled back.
+```text
+CREATED → INVENTORY_RESERVED → CONFIRMED
+```
+
+If inventory is missing or insufficient:
+
+```text
+CREATED → INVENTORY_FAILED
+```
+
+Inventory reservation is transactional:
+- reservations are rolled back on failure
+- inventory quantities remain unchanged
 
 ---
 
@@ -354,24 +369,32 @@ src/main/resources/application-postgres.yml
 # 🧠 What This Project Demonstrates
 
 * Layered architecture
+* Domain-oriented package structure
 * DTO validation
 * REST API design
 * Domain modeling
+* Explicit order state transitions
 * Event-driven architecture
 * Kafka producers & consumers
+* Asynchronous inventory reservation flow
+* Saga-style workflow handling
+* Transactional inventory reservation
+* Failure handling in asynchronous flows
+* Event consumers with persistence
 * Flyway database migrations
 * Integration testing with MockMvc
+* Service, repository, model, and workflow testing
 * Kotlin + Spring Boot development
-* Asynchronous inventory reservation flow
-* Event consumers with persistence
 
 ---
 
 # 🔮 Possible Improvements
 
-* Payment service integration
-* Dead-letter queue handling
-* Kafka retries and error handling
+* Compensation events for cancellations
+* Distributed saga orchestration
+* Optimistic locking for inventory concurrency
+* Payment-driven order confirmation
+* Retry policies & dead-letter queues
 * Outbox pattern
 * OpenAPI / Swagger
 * Authentication & authorization

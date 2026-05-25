@@ -70,6 +70,14 @@ class Order(
         status = OrderStatus.CANCELLED
     }
 
+    fun markInventoryReserved() {
+        status = OrderStatus.INVENTORY_RESERVED
+    }
+
+    fun confirm() {
+        status = OrderStatus.CONFIRMED
+    }
+
     companion object {
         fun create(
             customerId: UUID,
