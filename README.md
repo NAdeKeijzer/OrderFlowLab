@@ -160,6 +160,18 @@ Start PostgreSQL and Kafka:
 docker compose -f infrastructure/docker-compose.yml up -d
 ```
 
+Verify:
+
+```bash
+docker ps
+```
+
+You should see:
+
+* `orderflowlab-postgres`
+* `orderflowlab-kafka`
+
+---
 
 ## 2. Run the application
 
