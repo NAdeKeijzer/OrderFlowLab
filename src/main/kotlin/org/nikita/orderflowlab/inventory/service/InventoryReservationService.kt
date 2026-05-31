@@ -1,22 +1,20 @@
 package org.nikita.orderflowlab.inventory.service
 
-import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
-import org.nikita.orderflowlab.inventory.repository.InventoryReservationRepository
 import org.nikita.orderflowlab.inventory.exception.InsufficientInventoryException
 import org.nikita.orderflowlab.inventory.exception.InventoryItemNotFoundException
 import org.nikita.orderflowlab.inventory.model.InventoryReservation
+import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
+import org.nikita.orderflowlab.inventory.repository.InventoryReservationRepository
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class InventoryReservationService(
     private val inventoryReservationRepository: InventoryReservationRepository,
     private val inventoryItemRepository: InventoryItemRepository
 ) {
-
-    private val logger = LoggerFactory.getLogger(InventoryReservationService::class.java)
 
     @Transactional
     fun reserveFor(event: OrderCreatedEvent) {
@@ -34,7 +32,7 @@ class InventoryReservationService(
                 )
             }
 
-            inventoryItem.availableQuantity -= line.quantity
+            inventoryItem.decreaseAvailableQuantity(line.quantity)
 
             inventoryReservationRepository.save(
                 InventoryReservation(
@@ -43,13 +41,29 @@ class InventoryReservationService(
                     quantity = line.quantity
                 )
             )
-
-            logger.info(
-                "Reserved inventory for orderId={}, productId={}, quantity={}",
-                event.orderId,
-                line.productId,
-                line.quantity
-            )
         }
+    }
+
+    @Transactional
+    fun releaseFor(orderId: UUID) {
+        val reservations = inventoryReservationRepository
+            .findAllByOrderId(orderId)
+
+        reservations.forEach { reservation ->
+
+            val inventoryItem = inventoryItemRepository.findById(
+                reservation.productId
+            ).orElseThrow {
+                InventoryItemNotFoundException(reservation.productId)
+            }
+
+            inventoryItem.increaseAvailableQuantity(
+                reservation.quantity
+            )
+
+            inventoryItemRepository.save(inventoryItem)
+        }
+
+        inventoryReservationRepository.deleteAll(reservations)
     }
 }

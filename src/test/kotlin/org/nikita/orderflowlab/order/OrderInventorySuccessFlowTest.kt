@@ -71,4 +71,52 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
         assertThat(updatedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
         assertThat(updatedInventoryItem.availableQuantity).isEqualTo(8)
     }
+
+    @Test
+    fun `releases inventory when confirmed order is cancelled`() {
+        val productId = UUID.randomUUID()
+
+        inventoryItemRepository.save(
+            InventoryItem(
+                productId = productId,
+                availableQuantity = 10
+            )
+        )
+
+        val order = orderService.createOrder(
+            customerId = UUID.randomUUID(),
+            items = listOf(
+                CreateOrderLineRequest(
+                    productId = productId,
+                    quantity = 2,
+                    unitPrice = BigDecimal("9.99")
+                )
+            )
+        )
+
+        val event = OrderCreatedEvent(
+            orderId = order.id,
+            customerId = order.customerId,
+            totalPrice = order.total(),
+            createdAt = Instant.now(),
+            lines = listOf(
+                OrderCreatedLineEvent(
+                    productId = productId,
+                    quantity = 2
+                )
+            )
+        )
+
+        orderCreatedEventHandler.handle(event)
+
+        val inventoryAfterReservation = inventoryItemRepository.findById(productId).orElseThrow()
+        assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
+
+        val cancelledOrder = orderService.cancel(order.id)
+
+        val inventoryAfterCancellation = inventoryItemRepository.findById(productId).orElseThrow()
+
+        assertThat(cancelledOrder.status).isEqualTo(OrderStatus.CANCELLED)
+        assertThat(inventoryAfterCancellation.availableQuantity).isEqualTo(10)
+    }
 }

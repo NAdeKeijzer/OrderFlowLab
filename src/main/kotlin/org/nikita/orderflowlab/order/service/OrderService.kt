@@ -1,5 +1,6 @@
 package org.nikita.orderflowlab.order.service
 
+import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedLineEvent
@@ -15,7 +16,8 @@ import java.util.*
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
-    private val orderEventPublisher: OrderEventPublisher
+    private val orderEventPublisher: OrderEventPublisher,
+    private val inventoryReservationService: InventoryReservationService
 ) {
 
     @Transactional
@@ -106,6 +108,8 @@ class OrderService(
         val order = getOrder(id)
 
         order.cancel()
+
+        inventoryReservationService.releaseFor(order.id)
 
         return orderRepository.save(order)
     }
