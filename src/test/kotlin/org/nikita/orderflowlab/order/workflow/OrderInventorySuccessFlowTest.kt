@@ -1,6 +1,6 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.workflow
 
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.inventory.model.InventoryItem
 import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
@@ -68,8 +68,8 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
         val updatedOrder = orderService.getOrder(order.id)
         val updatedInventoryItem = inventoryItemRepository.findById(productId).orElseThrow()
 
-        assertThat(updatedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
-        assertThat(updatedInventoryItem.availableQuantity).isEqualTo(8)
+        Assertions.assertThat(updatedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
+        Assertions.assertThat(updatedInventoryItem.availableQuantity).isEqualTo(8)
     }
 
     @Test
@@ -110,13 +110,13 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
         orderCreatedEventHandler.handle(event)
 
         val inventoryAfterReservation = inventoryItemRepository.findById(productId).orElseThrow()
-        assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
+        Assertions.assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
 
         val cancelledOrder = orderService.cancel(order.id)
 
         val inventoryAfterCancellation = inventoryItemRepository.findById(productId).orElseThrow()
 
-        assertThat(cancelledOrder.status).isEqualTo(OrderStatus.CANCELLED)
-        assertThat(inventoryAfterCancellation.availableQuantity).isEqualTo(10)
+        Assertions.assertThat(cancelledOrder.status).isEqualTo(OrderStatus.CANCELLED)
+        Assertions.assertThat(inventoryAfterCancellation.availableQuantity).isEqualTo(10)
     }
 }
