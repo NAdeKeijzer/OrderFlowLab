@@ -1,6 +1,6 @@
-package org.nikita.orderflowlab.order
+package org.nikita.orderflowlab.order.workflow
 
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.NoOpOrderEventPublisher
@@ -57,6 +57,6 @@ class OrderInventoryFailureFlowTest @Autowired constructor(
 
         val updatedOrder = orderService.getOrder(order.id)
 
-        assertThat(updatedOrder.status).isEqualTo(OrderStatus.INVENTORY_FAILED)
+        Assertions.assertThat(updatedOrder.status).isEqualTo(OrderStatus.INVENTORY_FAILED)
     }
 }
