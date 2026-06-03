@@ -3,6 +3,8 @@ package org.nikita.orderflowlab.inventory
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.inventory.event.InventoryEventPublisher
+import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.inventory.exception.InsufficientInventoryException
 import org.nikita.orderflowlab.inventory.model.InventoryItem
 import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
@@ -14,8 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
-import kotlin.jvm.java
+import java.util.*
 
 @DataJpaTest
 class InventoryReservationServiceTest @Autowired constructor(
@@ -23,12 +24,15 @@ class InventoryReservationServiceTest @Autowired constructor(
     private val inventoryItemRepository: InventoryItemRepository
 ) {
 
+    private val inventoryEventPublisher = object : InventoryEventPublisher {
+        override fun publishInventoryReserved(event: InventoryReservedEvent) {
+            // no-op for tests
+        }
+    }
+
     @Test
     fun `reserves stock when enough inventory exists`() {
-        val service = InventoryReservationService(
-            inventoryReservationRepository,
-            inventoryItemRepository
-        )
+        val service = inventoryReservationService()
 
         val productId = UUID.randomUUID()
 
@@ -57,10 +61,7 @@ class InventoryReservationServiceTest @Autowired constructor(
 
     @Test
     fun `fails when insufficient stock exists`() {
-        val service = InventoryReservationService(
-            inventoryReservationRepository,
-            inventoryItemRepository
-        )
+        val service = inventoryReservationService()
 
         val productId = UUID.randomUUID()
 
@@ -86,6 +87,13 @@ class InventoryReservationServiceTest @Autowired constructor(
         assertThat(updatedItem.availableQuantity).isEqualTo(1)
         assertThat(reservations).isEmpty()
     }
+
+    private fun inventoryReservationService(): InventoryReservationService =
+        InventoryReservationService(
+            inventoryReservationRepository = inventoryReservationRepository,
+            inventoryItemRepository = inventoryItemRepository,
+            inventoryEventPublisher = inventoryEventPublisher
+        )
 
     private fun orderCreatedEvent(
         productId: UUID,

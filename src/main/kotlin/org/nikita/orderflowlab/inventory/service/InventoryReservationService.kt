@@ -1,5 +1,7 @@
 package org.nikita.orderflowlab.inventory.service
 
+import org.nikita.orderflowlab.inventory.event.InventoryEventPublisher
+import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.inventory.exception.InsufficientInventoryException
 import org.nikita.orderflowlab.inventory.exception.InventoryItemNotFoundException
 import org.nikita.orderflowlab.inventory.model.InventoryReservation
@@ -8,12 +10,14 @@ import org.nikita.orderflowlab.inventory.repository.InventoryReservationReposito
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.util.*
 
 @Service
 class InventoryReservationService(
     private val inventoryReservationRepository: InventoryReservationRepository,
-    private val inventoryItemRepository: InventoryItemRepository
+    private val inventoryItemRepository: InventoryItemRepository,
+    private val inventoryEventPublisher: InventoryEventPublisher
 ) {
 
     @Transactional
@@ -42,6 +46,13 @@ class InventoryReservationService(
                 )
             )
         }
+
+        inventoryEventPublisher.publishInventoryReserved(
+            InventoryReservedEvent(
+                orderId = event.orderId,
+                reservedAt = Instant.now()
+            )
+        )
     }
 
     @Transactional

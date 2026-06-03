@@ -2,6 +2,7 @@ package org.nikita.orderflowlab.order.workflow
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.inventory.event.NoOpInventoryEventPublisher
 import org.nikita.orderflowlab.inventory.model.InventoryItem
 import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
@@ -21,14 +22,16 @@ import java.util.*
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(NoOpOrderEventPublisher::class)
+@Import(
+    NoOpOrderEventPublisher::class,
+    NoOpInventoryEventPublisher::class
+)
 class OrderInventorySuccessFlowTest @Autowired constructor(
     private val orderService: OrderService,
     private val orderCreatedEventHandler: OrderCreatedEventHandler,
     private val inventoryItemRepository: InventoryItemRepository
 ) {
-
-    @Test
+@Test
     fun `confirms order and reduces inventory when reservation succeeds`() {
         val productId = UUID.randomUUID()
 
