@@ -1,4 +1,4 @@
-package org.nikita.orderflowlab.inventory
+package org.nikita.orderflowlab.inventory.service
 
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

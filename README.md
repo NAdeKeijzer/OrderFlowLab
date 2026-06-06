@@ -112,30 +112,15 @@ src/test/kotlin/org/nikita/orderflowlab
 │   OrderFlowLabApplicationTests.kt
 │
 ├── inventory
-│   ├── InventoryControllerTest.kt
-│   ├── InventoryReservationServiceTest.kt
-│   └── InventoryServiceTest.kt
-│
-└── order
-    │   OrderInventoryFailureFlowTest.kt
-    │   OrderInventorySuccessFlowTest.kt
-    │
-    ├── api
-    │   └── OrderControllerTest.kt
-    │
     ├── event
-    │   ├── NoOpOrderEventPublisher.kt
-    │   └── OrderCreatedEventHandlerTest.kt
-    │
-    ├── model
-    │   ├── OrderLineTest.kt
-    │   └── OrderTest.kt
-    │
-    ├── repository
-    │   └── OrderRepositoryTest.kt
-    │
     └── service
-        └── OrderServiceTest.kt
+│
+└── order    │
+    ├── api
+    ├── event
+    ├── model
+    ├── repository
+    └── service
 ```
 
 Database migrations:
@@ -196,6 +181,34 @@ http://localhost:8080
 ---
 
 # 🔍 Example API Usage
+
+# 📦 Inventory API
+
+## Create or Update Inventory Item
+
+Creates a new inventory item, or updates the available quantity when the product already exists.
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://localhost:8080/inventory-items" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body '{
+    "productId": "22222222-2222-2222-2222-222222222222",
+    "availableQuantity": 10
+  }'
+```
+
+---
+
+## Get Inventory Item
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://localhost:8080/inventory-items/22222222-2222-2222-2222-222222222222"
+```
+
+---
 
 # 📦 Order API
 
@@ -265,60 +278,40 @@ Invoke-RestMethod `
 
 ---
 
-# 📦 Inventory API
 
-## Create or Update Inventory Item
-
-Creates a new inventory item, or updates the available quantity when the product already exists.
-
-```powershell
-Invoke-RestMethod `
-  -Uri "http://localhost:8080/inventory-items" `
-  -Method Post `
-  -ContentType "application/json" `
-  -Body '{
-    "productId": "22222222-2222-2222-2222-222222222222",
-    "availableQuantity": 10
-  }'
-```
-
----
-
-## Get Inventory Item
-
-```powershell
-Invoke-RestMethod `
-  -Uri "http://localhost:8080/inventory-items/22222222-2222-2222-2222-222222222222"
-```
-
----
 
 ## Inventory Reservation Flow
+
 When an order is created, inventory is reserved asynchronously through Kafka.
 
-Successful flow:
+Example flow:
 
-1. Create inventory items for all ordered products.
-2. Create an order.
-3. `OrderCreatedEvent` is published to Kafka.
-4. `OrderCreatedConsumer` receives the event.
-5. `InventoryReservationService` creates inventory reservations.
-6. Available inventory quantities are reduced.
-7. Order status transitions:
+1. Create an inventory item with quantity `10`
+2. Create an order for quantity `2`
+3. `OrderCreatedEvent` is published to Kafka
+4. `OrderCreatedConsumer` receives the event
+5. `OrderWorkflowService` starts the inventory reservation workflow
+6. `InventoryReservationService` reserves inventory
+7. Available quantity is reduced from `10` to `8`
+8. `InventoryReservedEvent` is published
+9. `InventoryReservedConsumer` receives the event
+10. Order status transitions:
 
 ```text
-CREATED → INVENTORY_RESERVED → CONFIRMED
+CREATED
+→ INVENTORY_RESERVED
+→ CONFIRMED
 ```
-
-Failure flow:
 
 If inventory is missing or insufficient:
 
 ```text
-CREATED → INVENTORY_FAILED
+CREATED
+→ INVENTORY_FAILED
 ```
 
 Inventory reservation is transactional:
+
 - reservations are rolled back on failure
 - inventory quantities remain unchanged
 
@@ -401,40 +394,39 @@ src/main/resources/application-postgres.yml
 
 ---
 
-# 🧠 What This Project Demonstrates
+## 🧠 What This Project Demonstrates
 
 * Layered architecture
-* Domain-oriented package structure
 * DTO validation
 * REST API design
 * Domain modeling
-* Explicit order state transitions
 * Event-driven architecture
+* Event-driven workflow orchestration
+* Domain events between bounded contexts
 * Kafka producers & consumers
-* Asynchronous inventory reservation flow
-* Saga-style workflow handling
-* Transactional inventory reservation
-* Compensation logic for order cancellation
-* Failure handling in asynchronous flows
-* Event consumers with persistence
+* Saga-style process flow
 * Flyway database migrations
 * Integration testing with MockMvc
-* Service, repository, model, and workflow testing
 * Kotlin + Spring Boot development
+* Asynchronous inventory reservation flow
+* Event consumers with persistence
 
 ---
 
 # 🔮 Possible Improvements
 
-* Distributed saga orchestration
+* Payment service integration
+* InventoryReservationFailedEvent
 * Optimistic locking for inventory concurrency
-* Payment-driven order confirmation
 * Retry policies & dead-letter queues
 * Outbox pattern
+* Distributed tracing
 * OpenAPI / Swagger
 * Authentication & authorization
 * Testcontainers
 * CI/CD pipeline
+* Kubernetes deployment
+* AWS deployment
 
 ---
 

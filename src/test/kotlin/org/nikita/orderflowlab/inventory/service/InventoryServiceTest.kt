@@ -1,4 +1,4 @@
-package org.nikita.orderflowlab.inventory
+package org.nikita.orderflowlab.inventory.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.inventory.exception.InventoryItemNotFoundException
 import org.nikita.orderflowlab.inventory.model.InventoryItem
 import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
-import org.nikita.orderflowlab.inventory.service.InventoryService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import java.util.*

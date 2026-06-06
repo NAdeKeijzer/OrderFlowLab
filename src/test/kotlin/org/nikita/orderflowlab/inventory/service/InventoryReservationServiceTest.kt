@@ -1,4 +1,4 @@
-package org.nikita.orderflowlab.inventory
+package org.nikita.orderflowlab.inventory.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -9,7 +9,6 @@ import org.nikita.orderflowlab.inventory.exception.InsufficientInventoryExceptio
 import org.nikita.orderflowlab.inventory.model.InventoryItem
 import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
 import org.nikita.orderflowlab.inventory.repository.InventoryReservationRepository
-import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedLineEvent
 import org.springframework.beans.factory.annotation.Autowired
