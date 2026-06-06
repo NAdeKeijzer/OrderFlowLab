@@ -2,6 +2,7 @@ package org.nikita.orderflowlab.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.context.annotation.Bean
@@ -21,7 +22,6 @@ class KafkaConsumerConfig {
         kafkaProperties: KafkaProperties,
         objectMapper: ObjectMapper
     ): ConsumerFactory<String, OrderCreatedEvent> {
-
         val props = kafkaProperties.buildConsumerProperties()
 
         val deserializer = JsonDeserializer(
@@ -44,12 +44,40 @@ class KafkaConsumerConfig {
     fun orderCreatedEventKafkaListenerContainerFactory(
         orderCreatedEventConsumerFactory: ConsumerFactory<String, OrderCreatedEvent>
     ): ConcurrentKafkaListenerContainerFactory<String, OrderCreatedEvent> {
-
-        val factory =
-            ConcurrentKafkaListenerContainerFactory<String, OrderCreatedEvent>()
-
+        val factory = ConcurrentKafkaListenerContainerFactory<String, OrderCreatedEvent>()
         factory.setConsumerFactory(orderCreatedEventConsumerFactory)
+        return factory
+    }
 
+    @Bean
+    fun inventoryReservedEventConsumerFactory(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper
+    ): ConsumerFactory<String, InventoryReservedEvent> {
+        val props = kafkaProperties.buildConsumerProperties()
+
+        val deserializer = JsonDeserializer(
+            InventoryReservedEvent::class.java,
+            objectMapper
+        )
+
+        deserializer.addTrustedPackages(
+            "org.nikita.orderflowlab.inventory.event"
+        )
+
+        return DefaultKafkaConsumerFactory(
+            props,
+            StringDeserializer(),
+            deserializer
+        )
+    }
+
+    @Bean
+    fun inventoryReservedEventKafkaListenerContainerFactory(
+        inventoryReservedEventConsumerFactory: ConsumerFactory<String, InventoryReservedEvent>
+    ): ConcurrentKafkaListenerContainerFactory<String, InventoryReservedEvent> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, InventoryReservedEvent>()
+        factory.setConsumerFactory(inventoryReservedEventConsumerFactory)
         return factory
     }
 }

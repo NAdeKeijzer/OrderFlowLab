@@ -1,7 +1,9 @@
 package org.nikita.orderflowlab.order.workflow
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
+import org.nikita.orderflowlab.inventory.event.InventoryReservedEventHandler
 import org.nikita.orderflowlab.inventory.event.NoOpInventoryEventPublisher
 import org.nikita.orderflowlab.inventory.model.InventoryItem
 import org.nikita.orderflowlab.inventory.repository.InventoryItemRepository
@@ -29,9 +31,11 @@ import java.util.*
 class OrderInventorySuccessFlowTest @Autowired constructor(
     private val orderService: OrderService,
     private val orderCreatedEventHandler: OrderCreatedEventHandler,
+    private val inventoryReservedEventHandler: InventoryReservedEventHandler,
     private val inventoryItemRepository: InventoryItemRepository
 ) {
-@Test
+
+    @Test
     fun `confirms order and reduces inventory when reservation succeeds`() {
         val productId = UUID.randomUUID()
 
@@ -42,37 +46,26 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
             )
         )
 
-        val order = orderService.createOrder(
-            customerId = UUID.randomUUID(),
-            items = listOf(
-                CreateOrderLineRequest(
-                    productId = productId,
-                    quantity = 2,
-                    unitPrice = BigDecimal("9.99")
-                )
+        val order = createOrder(productId)
+
+        orderCreatedEventHandler.handle(orderCreatedEvent(order.id, order.customerId, productId))
+
+        val inventoryReservedOrder = orderService.getOrder(order.id)
+        val inventoryAfterReservation = inventoryItemRepository.findById(productId).orElseThrow()
+
+        assertThat(inventoryReservedOrder.status).isEqualTo(OrderStatus.INVENTORY_RESERVED)
+        assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
+
+        inventoryReservedEventHandler.handle(
+            InventoryReservedEvent(
+                orderId = order.id,
+                reservedAt = Instant.now()
             )
         )
 
-        val event = OrderCreatedEvent(
-            orderId = order.id,
-            customerId = order.customerId,
-            totalPrice = order.total(),
-            createdAt = Instant.now(),
-            lines = listOf(
-                OrderCreatedLineEvent(
-                    productId = productId,
-                    quantity = 2
-                )
-            )
-        )
+        val confirmedOrder = orderService.getOrder(order.id)
 
-        orderCreatedEventHandler.handle(event)
-
-        val updatedOrder = orderService.getOrder(order.id)
-        val updatedInventoryItem = inventoryItemRepository.findById(productId).orElseThrow()
-
-        Assertions.assertThat(updatedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
-        Assertions.assertThat(updatedInventoryItem.availableQuantity).isEqualTo(8)
+        assertThat(confirmedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
     }
 
     @Test
@@ -86,7 +79,30 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
             )
         )
 
-        val order = orderService.createOrder(
+        val order = createOrder(productId)
+
+        orderCreatedEventHandler.handle(orderCreatedEvent(order.id, order.customerId, productId))
+
+        inventoryReservedEventHandler.handle(
+            InventoryReservedEvent(
+                orderId = order.id,
+                reservedAt = Instant.now()
+            )
+        )
+
+        val inventoryAfterReservation = inventoryItemRepository.findById(productId).orElseThrow()
+        assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
+
+        val cancelledOrder = orderService.cancel(order.id)
+
+        val inventoryAfterCancellation = inventoryItemRepository.findById(productId).orElseThrow()
+
+        assertThat(cancelledOrder.status).isEqualTo(OrderStatus.CANCELLED)
+        assertThat(inventoryAfterCancellation.availableQuantity).isEqualTo(10)
+    }
+
+    private fun createOrder(productId: UUID) =
+        orderService.createOrder(
             customerId = UUID.randomUUID(),
             items = listOf(
                 CreateOrderLineRequest(
@@ -97,10 +113,15 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
             )
         )
 
-        val event = OrderCreatedEvent(
-            orderId = order.id,
-            customerId = order.customerId,
-            totalPrice = order.total(),
+    private fun orderCreatedEvent(
+        orderId: UUID,
+        customerId: UUID,
+        productId: UUID
+    ): OrderCreatedEvent =
+        OrderCreatedEvent(
+            orderId = orderId,
+            customerId = customerId,
+            totalPrice = BigDecimal("19.98"),
             createdAt = Instant.now(),
             lines = listOf(
                 OrderCreatedLineEvent(
@@ -109,17 +130,4 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
                 )
             )
         )
-
-        orderCreatedEventHandler.handle(event)
-
-        val inventoryAfterReservation = inventoryItemRepository.findById(productId).orElseThrow()
-        Assertions.assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
-
-        val cancelledOrder = orderService.cancel(order.id)
-
-        val inventoryAfterCancellation = inventoryItemRepository.findById(productId).orElseThrow()
-
-        Assertions.assertThat(cancelledOrder.status).isEqualTo(OrderStatus.CANCELLED)
-        Assertions.assertThat(inventoryAfterCancellation.availableQuantity).isEqualTo(10)
-    }
 }
