@@ -2,6 +2,7 @@ package org.nikita.orderflowlab.order.workflow
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.nikita.orderflowlab.inventory.event.NoOpInventoryEventPublisher
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.NoOpOrderEventPublisher
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
@@ -19,7 +20,10 @@ import java.util.*
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(NoOpOrderEventPublisher::class)
+@Import(
+    NoOpOrderEventPublisher::class,
+    NoOpInventoryEventPublisher::class
+)
 class OrderInventoryFailureFlowTest @Autowired constructor(
     private val orderService: OrderService,
     private val orderCreatedEventHandler: OrderCreatedEventHandler,

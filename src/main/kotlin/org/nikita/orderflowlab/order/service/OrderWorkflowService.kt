@@ -19,7 +19,6 @@ class OrderWorkflowService(
             inventoryReservationService.reserveFor(event)
 
             orderService.markInventoryReserved(event.orderId)
-            orderService.confirm(event.orderId)
 
             logger.info(
                 "Inventory reservation succeeded for orderId={}",

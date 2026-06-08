@@ -13,7 +13,7 @@ import java.util.*
 class OrderWorkflowServiceTest {
 
     @Test
-    fun `marks order as inventory reserved and confirmed when reservation succeeds`() {
+    fun `marks order as inventory reserved when reservation succeeds`() {
         val inventoryReservationService = mock(InventoryReservationService::class.java)
         val orderService = mock(OrderService::class.java)
 
@@ -28,10 +28,9 @@ class OrderWorkflowServiceTest {
 
         verify(inventoryReservationService).reserveFor(event)
         verify(orderService).markInventoryReserved(event.orderId)
-        verify(orderService).confirm(event.orderId)
+        verify(orderService, never()).confirm(event.orderId)
         verify(orderService, never()).markInventoryFailed(event.orderId)
     }
-
     @Test
     fun `marks order as inventory failed when reservation fails`() {
         val inventoryReservationService = mock(InventoryReservationService::class.java)
