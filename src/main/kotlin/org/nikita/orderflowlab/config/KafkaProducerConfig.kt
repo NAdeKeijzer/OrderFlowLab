@@ -2,6 +2,7 @@ package org.nikita.orderflowlab.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.StringSerializer
+import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties
@@ -57,5 +58,25 @@ class KafkaProducerConfig {
     fun inventoryReservedEventKafkaTemplate(
         producerFactory: ProducerFactory<String, InventoryReservedEvent>
     ): KafkaTemplate<String, InventoryReservedEvent> =
+        KafkaTemplate(producerFactory)
+    @Bean
+    fun inventoryReservationFailedEventProducerFactory(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper
+    ): ProducerFactory<String, InventoryReservationFailedEvent> {
+
+        val props = kafkaProperties.buildProducerProperties()
+
+        return DefaultKafkaProducerFactory(
+            props,
+            StringSerializer(),
+            JsonSerializer(objectMapper)
+        )
+    }
+
+    @Bean
+    fun inventoryReservationFailedEventKafkaTemplate(
+        producerFactory: ProducerFactory<String, InventoryReservationFailedEvent>
+    ): KafkaTemplate<String, InventoryReservationFailedEvent> =
         KafkaTemplate(producerFactory)
 }

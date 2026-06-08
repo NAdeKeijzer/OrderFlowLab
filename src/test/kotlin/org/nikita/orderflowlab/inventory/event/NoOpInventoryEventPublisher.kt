@@ -12,5 +12,11 @@ class NoOpInventoryEventPublisher {
             override fun publishInventoryReserved(event: InventoryReservedEvent) {
                 // Do nothing in tests
             }
+
+            override fun publishInventoryReservationFailed(
+                event: InventoryReservationFailedEvent
+            ) {
+                // Do nothing in tests
+            }
         }
 }

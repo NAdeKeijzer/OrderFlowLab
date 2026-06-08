@@ -1,7 +1,11 @@
 package org.nikita.orderflowlab.order.service
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
+import org.nikita.orderflowlab.inventory.event.InventoryEventPublisher
+import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
+import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.inventory.exception.InventoryItemNotFoundException
 import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
@@ -16,10 +20,12 @@ class OrderWorkflowServiceTest {
     fun `marks order as inventory reserved when reservation succeeds`() {
         val inventoryReservationService = mock(InventoryReservationService::class.java)
         val orderService = mock(OrderService::class.java)
+        val inventoryEventPublisher = FakeInventoryEventPublisher()
 
         val workflowService = OrderWorkflowService(
             inventoryReservationService = inventoryReservationService,
-            orderService = orderService
+            orderService = orderService,
+            inventoryEventPublisher = inventoryEventPublisher
         )
 
         val event = orderCreatedEvent()
@@ -30,15 +36,20 @@ class OrderWorkflowServiceTest {
         verify(orderService).markInventoryReserved(event.orderId)
         verify(orderService, never()).confirm(event.orderId)
         verify(orderService, never()).markInventoryFailed(event.orderId)
+
+        assertThat(inventoryEventPublisher.failedEvents).isEmpty()
     }
+
     @Test
-    fun `marks order as inventory failed when reservation fails`() {
+    fun `publishes inventory reservation failed event when reservation fails`() {
         val inventoryReservationService = mock(InventoryReservationService::class.java)
         val orderService = mock(OrderService::class.java)
+        val inventoryEventPublisher = FakeInventoryEventPublisher()
 
         val workflowService = OrderWorkflowService(
             inventoryReservationService = inventoryReservationService,
-            orderService = orderService
+            orderService = orderService,
+            inventoryEventPublisher = inventoryEventPublisher
         )
 
         val event = orderCreatedEvent()
@@ -50,9 +61,13 @@ class OrderWorkflowServiceTest {
         workflowService.handleOrderCreated(event)
 
         verify(inventoryReservationService).reserveFor(event)
-        verify(orderService).markInventoryFailed(event.orderId)
+        verify(orderService, never()).markInventoryFailed(event.orderId)
         verify(orderService, never()).markInventoryReserved(event.orderId)
         verify(orderService, never()).confirm(event.orderId)
+
+        assertThat(inventoryEventPublisher.failedEvents).hasSize(1)
+        assertThat(inventoryEventPublisher.failedEvents.first().orderId)
+            .isEqualTo(event.orderId)
     }
 
     private fun orderCreatedEvent(): OrderCreatedEvent =
@@ -68,4 +83,17 @@ class OrderWorkflowServiceTest {
                 )
             )
         )
+
+    private class FakeInventoryEventPublisher : InventoryEventPublisher {
+        val reservedEvents = mutableListOf<InventoryReservedEvent>()
+        val failedEvents = mutableListOf<InventoryReservationFailedEvent>()
+
+        override fun publishInventoryReserved(event: InventoryReservedEvent) {
+            reservedEvents += event
+        }
+
+        override fun publishInventoryReservationFailed(event: InventoryReservationFailedEvent) {
+            failedEvents += event
+        }
+    }
 }

@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.inventory.event.InventoryEventPublisher
+import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.inventory.exception.InsufficientInventoryException
 import org.nikita.orderflowlab.inventory.model.InventoryItem
@@ -22,9 +23,14 @@ class InventoryReservationServiceTest @Autowired constructor(
     private val inventoryReservationRepository: InventoryReservationRepository,
     private val inventoryItemRepository: InventoryItemRepository
 ) {
-
     private val inventoryEventPublisher = object : InventoryEventPublisher {
         override fun publishInventoryReserved(event: InventoryReservedEvent) {
+            // no-op for tests
+        }
+
+        override fun publishInventoryReservationFailed(
+            event: InventoryReservationFailedEvent
+        ) {
             // no-op for tests
         }
     }
