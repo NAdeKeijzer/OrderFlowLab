@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component
 
 @Component
 class KafkaInventoryEventPublisher(
-    private val kafkaTemplate: KafkaTemplate<String, InventoryReservedEvent>
+    private val inventoryReservedKafkaTemplate: KafkaTemplate<String, InventoryReservedEvent>,
+    private val inventoryReservationFailedKafkaTemplate: KafkaTemplate<String, InventoryReservationFailedEvent>
 ) : InventoryEventPublisher {
 
     private val logger = LoggerFactory.getLogger(KafkaInventoryEventPublisher::class.java)
 
     override fun publishInventoryReserved(event: InventoryReservedEvent) {
-        kafkaTemplate.send(
+        inventoryReservedKafkaTemplate.send(
             "inventory.reserved",
             event.orderId.toString(),
             event
@@ -20,6 +21,19 @@ class KafkaInventoryEventPublisher(
 
         logger.info(
             "Published inventory reserved event for orderId={}",
+            event.orderId
+        )
+    }
+
+    override fun publishInventoryReservationFailed(event: InventoryReservationFailedEvent) {
+        inventoryReservationFailedKafkaTemplate.send(
+            "inventory.reservation-failed",
+            event.orderId.toString(),
+            event
+        )
+
+        logger.info(
+            "Published inventory reservation failed event for orderId={}",
             event.orderId
         )
     }

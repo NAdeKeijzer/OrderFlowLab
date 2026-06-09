@@ -23,6 +23,16 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 
 ## 📦 Features
 
+### Inventory
+
+* Create inventory items
+* Retrieve inventory items
+* Reserve stock when orders are created
+* Prevent reservation when inventory is missing
+* Prevent reservation when stock is insufficient
+* Reduce available stock after reservation
+* Inventory updates are transactional
+
 ### Orders
 
 * Create orders
@@ -59,16 +69,6 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * JSON serialization/deserialization
 * Kafka integration via Docker
 
-### Inventory
-
-* Create inventory items
-* Retrieve inventory items
-* Reserve stock when orders are created
-* Prevent reservation when inventory is missing
-* Prevent reservation when stock is insufficient
-* Reduce available stock after reservation
-* Inventory updates are transactional
-
 ---
 
 # 🧱 Project Structure
@@ -88,6 +88,7 @@ src/main/kotlin/org/nikita/orderflowlab
 ├── inventory
 │   ├── api
 │   ├── dto
+│   ├── event
 │   ├── exception
 │   ├── model
 │   ├── repository
@@ -112,10 +113,10 @@ src/test/kotlin/org/nikita/orderflowlab
 │   OrderFlowLabApplicationTests.kt
 │
 ├── inventory
-    ├── event
-    └── service
+│   ├── event
+│   └── service
 │
-└── order    │
+└── order    
     ├── api
     ├── event
     ├── model
@@ -305,6 +306,13 @@ CREATED
 
 If inventory is missing or insufficient:
 
+1. `OrderCreatedConsumer` receives the event
+2. `OrderWorkflowService` attempts inventory reservation
+3. Inventory reservation fails
+4. `InventoryReservationFailedEvent` is published
+5. `InventoryReservationFailedEventHandler` handles the event
+6. Order status transitions:
+
 ```text
 CREATED
 → INVENTORY_FAILED
@@ -416,7 +424,6 @@ src/main/resources/application-postgres.yml
 # 🔮 Possible Improvements
 
 * Payment service integration
-* InventoryReservationFailedEvent
 * Optimistic locking for inventory concurrency
 * Retry policies & dead-letter queues
 * Outbox pattern
