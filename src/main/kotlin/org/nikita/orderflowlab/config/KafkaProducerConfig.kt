@@ -5,6 +5,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
+import org.nikita.orderflowlab.payment.event.PaymentRequestedEvent
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -59,6 +60,7 @@ class KafkaProducerConfig {
         producerFactory: ProducerFactory<String, InventoryReservedEvent>
     ): KafkaTemplate<String, InventoryReservedEvent> =
         KafkaTemplate(producerFactory)
+
     @Bean
     fun inventoryReservationFailedEventProducerFactory(
         kafkaProperties: KafkaProperties,
@@ -78,5 +80,26 @@ class KafkaProducerConfig {
     fun inventoryReservationFailedEventKafkaTemplate(
         producerFactory: ProducerFactory<String, InventoryReservationFailedEvent>
     ): KafkaTemplate<String, InventoryReservationFailedEvent> =
+        KafkaTemplate(producerFactory)
+
+    @Bean
+    fun paymentRequestedEventProducerFactory(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper
+    ): ProducerFactory<String, PaymentRequestedEvent> {
+
+        val props = kafkaProperties.buildProducerProperties()
+
+        return DefaultKafkaProducerFactory(
+            props,
+            StringSerializer(),
+            JsonSerializer(objectMapper)
+        )
+    }
+
+    @Bean
+    fun paymentRequestedEventKafkaTemplate(
+        producerFactory: ProducerFactory<String, PaymentRequestedEvent>
+    ): KafkaTemplate<String, PaymentRequestedEvent> =
         KafkaTemplate(producerFactory)
 }

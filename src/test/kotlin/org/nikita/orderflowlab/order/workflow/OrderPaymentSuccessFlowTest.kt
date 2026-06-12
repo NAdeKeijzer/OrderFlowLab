@@ -15,13 +15,17 @@ import org.nikita.orderflowlab.order.event.OrderCreatedLineEvent
 import org.nikita.orderflowlab.order.model.OrderStatus
 import org.nikita.orderflowlab.order.service.OrderService
 import org.nikita.orderflowlab.payment.event.NoOpPaymentEventPublisher
+import org.nikita.orderflowlab.payment.event.PaymentRequestedEvent
+import org.nikita.orderflowlab.payment.event.PaymentRequestedEventHandler
+import org.nikita.orderflowlab.payment.event.PaymentSucceededEvent
+import org.nikita.orderflowlab.payment.event.PaymentSucceededEventHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,15 +34,17 @@ import java.util.*
     NoOpInventoryEventPublisher::class,
     NoOpPaymentEventPublisher::class
 )
-class OrderInventorySuccessFlowTest @Autowired constructor(
+class OrderPaymentSuccessFlowTest @Autowired constructor(
     private val orderService: OrderService,
     private val orderCreatedEventHandler: OrderCreatedEventHandler,
     private val inventoryReservedEventHandler: InventoryReservedEventHandler,
+    private val paymentRequestedEventHandler: PaymentRequestedEventHandler,
+    private val paymentSucceededEventHandler: PaymentSucceededEventHandler,
     private val inventoryItemRepository: InventoryItemRepository
 ) {
 
     @Test
-    fun `marks order as inventory reserved and reduces inventory when reservation succeeds`() {
+    fun `confirms order after inventory reservation and successful payment`() {
         val productId = UUID.randomUUID()
 
         inventoryItemRepository.save(
@@ -48,62 +54,7 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
             )
         )
 
-        val order = createOrder(productId)
-
-        orderCreatedEventHandler.handle(
-            orderCreatedEvent(
-                orderId = order.id,
-                customerId = order.customerId,
-                productId = productId
-            )
-        )
-
-        val updatedOrder = orderService.getOrder(order.id)
-        val updatedInventoryItem = inventoryItemRepository.findById(productId).orElseThrow()
-
-        assertThat(updatedOrder.status).isEqualTo(OrderStatus.INVENTORY_RESERVED)
-        assertThat(updatedInventoryItem.availableQuantity).isEqualTo(8)
-    }
-
-    @Test
-    fun `publishes payment request when inventory reserved event is handled`() {
-        val productId = UUID.randomUUID()
-
-        inventoryItemRepository.save(
-            InventoryItem(
-                productId = productId,
-                availableQuantity = 10
-            )
-        )
-
-        val order = createOrder(productId)
-
-        orderCreatedEventHandler.handle(
-            orderCreatedEvent(
-                orderId = order.id,
-                customerId = order.customerId,
-                productId = productId
-            )
-        )
-
-        inventoryReservedEventHandler.handle(
-            InventoryReservedEvent(
-                orderId = order.id,
-                customerId = order.customerId,
-                totalPrice = order.total(),
-                reservedAt = Instant.now()
-            )
-        )
-
-        val updatedOrder = orderService.getOrder(order.id)
-        val updatedInventoryItem = inventoryItemRepository.findById(productId).orElseThrow()
-
-        assertThat(updatedOrder.status).isEqualTo(OrderStatus.INVENTORY_RESERVED)
-        assertThat(updatedInventoryItem.availableQuantity).isEqualTo(8)
-    }
-
-    private fun createOrder(productId: UUID) =
-        orderService.createOrder(
+        val order = orderService.createOrder(
             customerId = UUID.randomUUID(),
             items = listOf(
                 CreateOrderLineRequest(
@@ -114,21 +65,54 @@ class OrderInventorySuccessFlowTest @Autowired constructor(
             )
         )
 
-    private fun orderCreatedEvent(
-        orderId: UUID,
-        customerId: UUID,
-        productId: UUID
-    ): OrderCreatedEvent =
-        OrderCreatedEvent(
-            orderId = orderId,
-            customerId = customerId,
-            totalPrice = BigDecimal("19.98"),
-            createdAt = Instant.now(),
-            lines = listOf(
-                OrderCreatedLineEvent(
-                    productId = productId,
-                    quantity = 2
+        orderCreatedEventHandler.handle(
+            OrderCreatedEvent(
+                orderId = order.id,
+                customerId = order.customerId,
+                totalPrice = order.total(),
+                createdAt = order.createdAt,
+                lines = listOf(
+                    OrderCreatedLineEvent(
+                        productId = productId,
+                        quantity = 2
+                    )
                 )
             )
         )
+
+        val inventoryReservedOrder = orderService.getOrder(order.id)
+        val inventoryAfterReservation = inventoryItemRepository.findById(productId).orElseThrow()
+
+        assertThat(inventoryReservedOrder.status).isEqualTo(OrderStatus.INVENTORY_RESERVED)
+        assertThat(inventoryAfterReservation.availableQuantity).isEqualTo(8)
+
+        inventoryReservedEventHandler.handle(
+            InventoryReservedEvent(
+                orderId = order.id,
+                customerId = order.customerId,
+                totalPrice = order.total(),
+                reservedAt = Instant.now()
+            )
+        )
+
+        paymentRequestedEventHandler.handle(
+            PaymentRequestedEvent(
+                orderId = order.id,
+                customerId = order.customerId,
+                amount = order.total(),
+                requestedAt = Instant.now()
+            )
+        )
+
+        paymentSucceededEventHandler.handle(
+            PaymentSucceededEvent(
+                orderId = order.id,
+                paidAt = Instant.now()
+            )
+        )
+
+        val confirmedOrder = orderService.getOrder(order.id)
+
+        assertThat(confirmedOrder.status).isEqualTo(OrderStatus.CONFIRMED)
+    }
 }
