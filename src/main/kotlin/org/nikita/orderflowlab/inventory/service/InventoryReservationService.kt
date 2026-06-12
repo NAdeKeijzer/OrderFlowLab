@@ -50,6 +50,8 @@ class InventoryReservationService(
         inventoryEventPublisher.publishInventoryReserved(
             InventoryReservedEvent(
                 orderId = event.orderId,
+                customerId = event.customerId,
+                totalPrice = event.totalPrice,
                 reservedAt = Instant.now()
             )
         )
