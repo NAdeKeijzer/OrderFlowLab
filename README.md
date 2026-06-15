@@ -43,6 +43,15 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * Handle asynchronous inventory reservation
 * Confirm orders after successful inventory reservation
 * Mark orders as failed when inventory reservation fails
+* Confirm orders after successful payment
+* Mark orders as payment failed when payment fails
+
+### Payments
+
+* Request payment after successful inventory reservation
+* Simulate successful payment
+* Handle failed payments
+* Release inventory when payment fails
 
 ### Validation
 
@@ -75,16 +84,8 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 
 ```text
 src/main/kotlin/org/nikita/orderflowlab
-│   OrderFlowLabApplication.kt
-│
 ├── common
-│   └── ApiExceptionHandler.kt
-│
 ├── config
-│   ├── JacksonConfig.kt
-│   ├── KafkaConsumerConfig.kt
-│   └── KafkaProducerConfig.kt
-│
 ├── inventory
 │   ├── api
 │   ├── dto
@@ -93,15 +94,16 @@ src/main/kotlin/org/nikita/orderflowlab
 │   ├── model
 │   ├── repository
 │   └── service
-│
-└── order
-    ├── api
-    ├── dto
-    ├── event
-    ├── exception
-    ├── model
-    ├── repository
-    └── service
+├── order
+│   ├── api
+│   ├── dto
+│   ├── event
+│   ├── exception
+│   ├── model
+│   ├── repository
+│   └── service
+└── payment
+    └── event
 ```
 
 The project is organized by domain (`order`, `inventory`) and layered by responsibility (`api`, `service`, `repository`, `model`, etc.).
@@ -116,12 +118,15 @@ src/test/kotlin/org/nikita/orderflowlab
 │   ├── event
 │   └── service
 │
-└── order    
-    ├── api
-    ├── event
-    ├── model
-    ├── repository
-    └── service
+├── order    
+│   ├── api    
+│   ├── event
+│   ├── model
+│   ├── repository
+│   └── service
+└── payment
+    └── event    
+    
 ```
 
 Database migrations:
@@ -279,24 +284,26 @@ Invoke-RestMethod `
 
 ---
 
+## Order Workflow
 
+When an order is created, inventory reservation and payment processing are handled asynchronously through Kafka events.
 
-## Inventory Reservation Flow
+Successful flow:
 
-When an order is created, inventory is reserved asynchronously through Kafka.
-
-Example flow:
-
-1. Create an inventory item with quantity `10`
-2. Create an order for quantity `2`
-3. `OrderCreatedEvent` is published to Kafka
-4. `OrderCreatedConsumer` receives the event
-5. `OrderWorkflowService` starts the inventory reservation workflow
-6. `InventoryReservationService` reserves inventory
-7. Available quantity is reduced from `10` to `8`
-8. `InventoryReservedEvent` is published
-9. `InventoryReservedConsumer` receives the event
-10. Order status transitions:
+1. Create inventory for the ordered products.
+2. Create an order.
+3. `OrderCreatedEvent` is published.
+4. `OrderCreatedConsumer` receives the event.
+5. `OrderWorkflowService` starts inventory reservation.
+6. `InventoryReservationService` reserves inventory.
+7. Available inventory quantity is reduced.
+8. `InventoryReservedEvent` is published.
+9. `InventoryReservedConsumer` receives the event.
+10. `PaymentRequestedEvent` is published.
+11. `PaymentRequestedConsumer` receives the event.
+12. `PaymentSucceededEvent` is published.
+13. `PaymentSucceededConsumer` receives the event.
+14. Order status transitions:
 
 ```text
 CREATED
@@ -304,14 +311,9 @@ CREATED
 → CONFIRMED
 ```
 
-If inventory is missing or insufficient:
+Inventory failure flow:
 
-1. `OrderCreatedConsumer` receives the event
-2. `OrderWorkflowService` attempts inventory reservation
-3. Inventory reservation fails
-4. `InventoryReservationFailedEvent` is published
-5. `InventoryReservationFailedEventHandler` handles the event
-6. Order status transitions:
+If inventory is missing or insufficient:
 
 ```text
 CREATED
@@ -323,13 +325,31 @@ Inventory reservation is transactional:
 - reservations are rolled back on failure
 - inventory quantities remain unchanged
 
+Payment failure flow:
+
+If payment fails after inventory has been reserved:
+
+```text
+CREATED
+→ INVENTORY_RESERVED
+→ PAYMENT_FAILED
+```
+
+When payment fails:
+
+- inventory reservations for the order are released
+- available inventory quantities are increased again
+- the order is marked as `PAYMENT_FAILED`
+
 Cancellation flow:
 
 ```text
-CONFIRMED → CANCELLED
+CONFIRMED
+→ CANCELLED
 ```
 
 When a confirmed order is canceled:
+
 - inventory reservations for the order are released
 - available inventory quantities are increased again
 - reservation records are removed
@@ -409,21 +429,20 @@ src/main/resources/application-postgres.yml
 * REST API design
 * Domain modeling
 * Event-driven architecture
-* Event-driven workflow orchestration
 * Domain events between bounded contexts
 * Kafka producers & consumers
 * Saga-style process flow
+* Asynchronous workflow orchestration
+* Inventory reservation with compensation
+* Payment processing workflow
 * Flyway database migrations
 * Integration testing with MockMvc
 * Kotlin + Spring Boot development
-* Asynchronous inventory reservation flow
-* Event consumers with persistence
 
 ---
 
 # 🔮 Possible Improvements
 
-* Payment service integration
 * Optimistic locking for inventory concurrency
 * Retry policies & dead-letter queues
 * Outbox pattern
@@ -434,6 +453,7 @@ src/main/resources/application-postgres.yml
 * CI/CD pipeline
 * Kubernetes deployment
 * AWS deployment
+* Idempotent event processing
 
 ---
 
