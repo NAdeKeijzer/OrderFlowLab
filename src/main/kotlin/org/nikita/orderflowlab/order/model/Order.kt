@@ -7,7 +7,7 @@ import org.nikita.orderflowlab.order.exception.OrderAlreadyPaidException
 import org.nikita.orderflowlab.order.exception.PaidOrderCannotBeCancelledException
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "orders")
@@ -76,6 +76,10 @@ class Order(
 
     fun confirm() {
         status = OrderStatus.CONFIRMED
+    }
+
+    fun markPaymentFailed() {
+        status = OrderStatus.PAYMENT_FAILED
     }
 
     companion object {

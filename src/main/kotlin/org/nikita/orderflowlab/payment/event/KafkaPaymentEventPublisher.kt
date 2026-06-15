@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 @Component
 class KafkaPaymentEventPublisher(
     private val paymentRequestedKafkaTemplate: KafkaTemplate<String, PaymentRequestedEvent>,
-    private val paymentSucceededKafkaTemplate: KafkaTemplate<String, PaymentSucceededEvent>
+    private val paymentSucceededKafkaTemplate: KafkaTemplate<String, PaymentSucceededEvent>,
+    private val paymentFailedKafkaTemplate: KafkaTemplate<String, PaymentFailedEvent>
 ) : PaymentEventPublisher {
 
     private val logger = LoggerFactory.getLogger(KafkaPaymentEventPublisher::class.java)
@@ -36,6 +37,20 @@ class KafkaPaymentEventPublisher(
         logger.info(
             "Published payment succeeded event for orderId={}",
             event.orderId
+        )
+    }
+
+    override fun publishPaymentFailed(event: PaymentFailedEvent) {
+        paymentFailedKafkaTemplate.send(
+            "payment.failed",
+            event.orderId.toString(),
+            event
+        )
+
+        logger.info(
+            "Published payment failed event for orderId={}, reason={}",
+            event.orderId,
+            event.reason
         )
     }
 }

@@ -5,4 +5,6 @@ interface PaymentEventPublisher {
     fun publishPaymentRequested(event: PaymentRequestedEvent)
 
     fun publishPaymentSucceeded(event: PaymentSucceededEvent)
+
+    fun publishPaymentFailed(event: PaymentFailedEvent)
 }

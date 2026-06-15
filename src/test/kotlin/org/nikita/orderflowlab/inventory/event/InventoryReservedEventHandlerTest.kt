@@ -3,6 +3,7 @@ package org.nikita.orderflowlab.inventory.event
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.nikita.orderflowlab.payment.event.PaymentEventPublisher
+import org.nikita.orderflowlab.payment.event.PaymentFailedEvent
 import org.nikita.orderflowlab.payment.event.PaymentRequestedEvent
 import org.nikita.orderflowlab.payment.event.PaymentSucceededEvent
 import java.math.BigDecimal
@@ -46,6 +47,10 @@ class InventoryReservedEventHandlerTest {
         }
 
         override fun publishPaymentSucceeded(event: PaymentSucceededEvent) {
+            // not used in this test
+        }
+
+        override fun publishPaymentFailed(event: PaymentFailedEvent) {
             // not used in this test
         }
     }
