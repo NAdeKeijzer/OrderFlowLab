@@ -5,6 +5,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
+import org.nikita.orderflowlab.payment.event.PaymentFailedEvent
 import org.nikita.orderflowlab.payment.event.PaymentRequestedEvent
 import org.nikita.orderflowlab.payment.event.PaymentSucceededEvent
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties
@@ -167,6 +168,41 @@ class KafkaConsumerConfig {
     ): ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent>()
         factory.setConsumerFactory(paymentSucceededEventConsumerFactory)
+        return factory
+    }
+
+    @Bean
+    fun paymentFailedEventConsumerFactory(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper
+    ): ConsumerFactory<String, PaymentFailedEvent> {
+
+        val props = kafkaProperties.buildConsumerProperties()
+
+        val deserializer = JsonDeserializer(
+            PaymentFailedEvent::class.java,
+            objectMapper
+        )
+
+        deserializer.addTrustedPackages("org.nikita.orderflowlab.payment.event")
+
+        return DefaultKafkaConsumerFactory(
+            props,
+            StringDeserializer(),
+            deserializer
+        )
+    }
+
+    @Bean
+    fun paymentFailedEventKafkaListenerContainerFactory(
+        paymentFailedEventConsumerFactory: ConsumerFactory<String, PaymentFailedEvent>
+    ): ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent> {
+
+        val factory =
+            ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent>()
+
+        factory.setConsumerFactory(paymentFailedEventConsumerFactory)
+
         return factory
     }
 }
