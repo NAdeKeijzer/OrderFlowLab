@@ -65,6 +65,35 @@ class InventoryReservationServiceTest @Autowired constructor(
     }
 
     @Test
+    fun `increments version when inventory is reserved`() {
+        val service = inventoryReservationService()
+
+        val productId = UUID.randomUUID()
+
+        val savedItem = inventoryItemRepository.saveAndFlush(
+            InventoryItem(
+                productId = productId,
+                availableQuantity = 5
+            )
+        )
+
+        val initialVersion = savedItem.version
+
+        val event = orderCreatedEvent(
+            productId = productId,
+            quantity = 2
+        )
+
+        service.reserveFor(event)
+
+        inventoryItemRepository.flush()
+
+        val updatedItem = inventoryItemRepository.findById(productId).orElseThrow()
+
+        assertThat(updatedItem.version).isGreaterThan(initialVersion)
+    }
+
+    @Test
     fun `fails when insufficient stock exists`() {
         val service = inventoryReservationService()
 
