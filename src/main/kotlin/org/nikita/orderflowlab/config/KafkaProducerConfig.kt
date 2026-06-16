@@ -5,7 +5,9 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
+import org.nikita.orderflowlab.payment.event.PaymentFailedEvent
 import org.nikita.orderflowlab.payment.event.PaymentRequestedEvent
+import org.nikita.orderflowlab.payment.event.PaymentSucceededEvent
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -101,5 +103,47 @@ class KafkaProducerConfig {
     fun paymentRequestedEventKafkaTemplate(
         producerFactory: ProducerFactory<String, PaymentRequestedEvent>
     ): KafkaTemplate<String, PaymentRequestedEvent> =
+        KafkaTemplate(producerFactory)
+
+    @Bean
+    fun paymentSucceededEventProducerFactory(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper
+    ): ProducerFactory<String, PaymentSucceededEvent> {
+
+        val props = kafkaProperties.buildProducerProperties()
+
+        return DefaultKafkaProducerFactory(
+            props,
+            StringSerializer(),
+            JsonSerializer(objectMapper)
+        )
+    }
+
+    @Bean
+    fun paymentSucceededEventKafkaTemplate(
+        producerFactory: ProducerFactory<String, PaymentSucceededEvent>
+    ): KafkaTemplate<String, PaymentSucceededEvent> =
+        KafkaTemplate(producerFactory)
+
+    @Bean
+    fun paymentFailedEventProducerFactory(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper
+    ): ProducerFactory<String, PaymentFailedEvent> {
+
+        val props = kafkaProperties.buildProducerProperties()
+
+        return DefaultKafkaProducerFactory(
+            props,
+            StringSerializer(),
+            JsonSerializer(objectMapper)
+        )
+    }
+
+    @Bean
+    fun paymentFailedEventKafkaTemplate(
+        producerFactory: ProducerFactory<String, PaymentFailedEvent>
+    ): KafkaTemplate<String, PaymentFailedEvent> =
         KafkaTemplate(producerFactory)
 }

@@ -16,5 +16,9 @@ class NoOpPaymentEventPublisher {
             override fun publishPaymentSucceeded(event: PaymentSucceededEvent) {
                 // Do nothing in tests
             }
+
+            override fun publishPaymentFailed(event: PaymentFailedEvent) {
+                // Do nothing in tests
+            }
         }
 }

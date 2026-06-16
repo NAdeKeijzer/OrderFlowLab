@@ -113,4 +113,13 @@ class OrderService(
 
         return orderRepository.save(order)
     }
+
+    @Transactional
+    fun markPaymentFailed(id: UUID): Order {
+        val order = getOrder(id)
+
+        order.markPaymentFailed()
+
+        return orderRepository.save(order)
+    }
 }
