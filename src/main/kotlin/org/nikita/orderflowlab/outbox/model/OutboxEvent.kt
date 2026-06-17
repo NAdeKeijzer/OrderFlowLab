@@ -28,4 +28,9 @@ class OutboxEvent(
 
     @Column
     var publishedAt: Instant? = null
-)
+) {
+
+    fun markPublished() {
+        publishedAt = Instant.now()
+    }
+}

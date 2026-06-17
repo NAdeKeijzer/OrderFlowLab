@@ -4,4 +4,7 @@ import org.nikita.orderflowlab.outbox.model.OutboxEvent
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
-interface OutboxEventRepository : JpaRepository<OutboxEvent, UUID>
+interface OutboxEventRepository : JpaRepository<OutboxEvent, UUID> {
+
+    fun findAllByPublishedAtIsNull(): List<OutboxEvent>
+}
