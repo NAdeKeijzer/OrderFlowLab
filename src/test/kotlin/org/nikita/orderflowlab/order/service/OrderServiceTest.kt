@@ -13,6 +13,7 @@ import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import org.nikita.orderflowlab.order.exception.*
 import org.nikita.orderflowlab.order.model.OrderStatus
 import org.nikita.orderflowlab.order.repository.OrderRepository
+import org.nikita.orderflowlab.outbox.repository.OutboxEventRepository
 import org.nikita.orderflowlab.outbox.service.OutboxEventService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
@@ -21,11 +22,13 @@ import java.util.*
 
 @DataJpaTest
 class OrderServiceTest @Autowired constructor(
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val outboxEventRepository: OutboxEventRepository
 ) {
     private val inventoryReservationService = mock(InventoryReservationService::class.java)
-    private val outboxEventService = mock(OutboxEventService::class.java)
+    private val outboxEventService = OutboxEventService(outboxEventRepository)
     private val objectMapper = ObjectMapper()
+        .findAndRegisterModules()
 
     private val orderService = OrderService(
         orderRepository = orderRepository,
@@ -191,6 +194,21 @@ class OrderServiceTest @Autowired constructor(
         assertThatThrownBy {
             orderService.cancel(order.id)
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
+    }
+
+    @Test
+    fun `stores order created event in outbox when order is created`() {
+        val order = orderService.createOrder(
+            customerId = UUID.randomUUID(),
+            items = listOf(validOrderLineRequest())
+        )
+
+        val outboxEvents = outboxEventRepository.findAll()
+            .filter { it.aggregateId == order.id }
+
+        assertThat(outboxEvents).hasSize(1)
+        assertThat(outboxEvents.first().eventType).isEqualTo("ORDER_CREATED")
+        assertThat(outboxEvents.first().payload).contains(order.id.toString())
     }
 
     private fun validOrderLineRequest(

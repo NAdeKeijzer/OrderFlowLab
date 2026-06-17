@@ -44,22 +44,26 @@ class OrderService(
 
         val savedOrder = orderRepository.save(order)
 
-        orderEventPublisher.publishOrderCreated(
-            OrderCreatedEvent(
-                orderId = savedOrder.id,
-                customerId = savedOrder.customerId,
-                totalPrice = savedOrder.total(),
-                createdAt = savedOrder.createdAt,
-                lines = savedOrder.lines.map {
-                    OrderCreatedLineEvent(
-                        productId = it.productId,
-                        quantity = it.quantity
-                    )
-                }
-            )
-
-
+        val orderCreatedEvent = OrderCreatedEvent(
+            orderId = savedOrder.id,
+            customerId = savedOrder.customerId,
+            totalPrice = savedOrder.total(),
+            createdAt = savedOrder.createdAt,
+            lines = savedOrder.lines.map {
+                OrderCreatedLineEvent(
+                    productId = it.productId,
+                    quantity = it.quantity
+                )
+            }
         )
+
+        outboxEventService.save(
+            eventType = "ORDER_CREATED",
+            aggregateId = savedOrder.id,
+            payload = objectMapper.writeValueAsString(orderCreatedEvent)
+        )
+
+        orderEventPublisher.publishOrderCreated(orderCreatedEvent)
 
         return savedOrder
     }
