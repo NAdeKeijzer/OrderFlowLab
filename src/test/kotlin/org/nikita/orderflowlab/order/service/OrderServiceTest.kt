@@ -1,5 +1,6 @@
 package org.nikita.orderflowlab.order.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -12,6 +13,7 @@ import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import org.nikita.orderflowlab.order.exception.*
 import org.nikita.orderflowlab.order.model.OrderStatus
 import org.nikita.orderflowlab.order.repository.OrderRepository
+import org.nikita.orderflowlab.outbox.service.OutboxEventService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import java.math.BigDecimal
@@ -22,6 +24,8 @@ class OrderServiceTest @Autowired constructor(
     private val orderRepository: OrderRepository
 ) {
     private val inventoryReservationService = mock(InventoryReservationService::class.java)
+    private val outboxEventService = mock(OutboxEventService::class.java)
+    private val objectMapper = ObjectMapper()
 
     private val orderService = OrderService(
         orderRepository = orderRepository,
@@ -30,7 +34,9 @@ class OrderServiceTest @Autowired constructor(
                 // no-op for service tests
             }
         },
-        inventoryReservationService = inventoryReservationService
+        inventoryReservationService = inventoryReservationService,
+        outboxEventService = outboxEventService,
+        objectMapper = objectMapper
     )
 
     @Test
