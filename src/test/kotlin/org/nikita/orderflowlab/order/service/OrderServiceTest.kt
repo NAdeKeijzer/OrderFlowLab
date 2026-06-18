@@ -8,8 +8,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
-import org.nikita.orderflowlab.order.event.OrderCreatedEvent
-import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import org.nikita.orderflowlab.order.exception.*
 import org.nikita.orderflowlab.order.model.OrderStatus
 import org.nikita.orderflowlab.order.repository.OrderRepository
@@ -32,11 +30,6 @@ class OrderServiceTest @Autowired constructor(
 
     private val orderService = OrderService(
         orderRepository = orderRepository,
-        orderEventPublisher = object : OrderEventPublisher {
-            override fun publishOrderCreated(event: OrderCreatedEvent) {
-                // no-op for service tests
-            }
-        },
         inventoryReservationService = inventoryReservationService,
         outboxEventService = outboxEventService,
         objectMapper = objectMapper

@@ -5,7 +5,6 @@ import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
 import org.nikita.orderflowlab.order.event.OrderCreatedEvent
 import org.nikita.orderflowlab.order.event.OrderCreatedLineEvent
-import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import org.nikita.orderflowlab.order.exception.OrderNotFoundException
 import org.nikita.orderflowlab.order.model.Order
 import org.nikita.orderflowlab.order.model.OrderLineInput
@@ -18,7 +17,6 @@ import java.util.*
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
-    private val orderEventPublisher: OrderEventPublisher,
     private val inventoryReservationService: InventoryReservationService,
     private val outboxEventService: OutboxEventService,
     private val objectMapper: ObjectMapper
