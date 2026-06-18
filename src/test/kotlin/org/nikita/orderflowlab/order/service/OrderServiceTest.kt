@@ -197,7 +197,7 @@ class OrderServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `stores order created event in outbox when order is created`() {
+    fun `creates order and stores order created event in outbox`() {
         val order = orderService.createOrder(
             customerId = UUID.randomUUID(),
             items = listOf(validOrderLineRequest())
@@ -206,9 +206,11 @@ class OrderServiceTest @Autowired constructor(
         val outboxEvents = outboxEventRepository.findAll()
             .filter { it.aggregateId == order.id }
 
+        assertThat(order.id).isNotNull()
         assertThat(outboxEvents).hasSize(1)
         assertThat(outboxEvents.first().eventType).isEqualTo("ORDER_CREATED")
         assertThat(outboxEvents.first().payload).contains(order.id.toString())
+        assertThat(outboxEvents.first().publishedAt).isNull()
     }
 
     private fun validOrderLineRequest(

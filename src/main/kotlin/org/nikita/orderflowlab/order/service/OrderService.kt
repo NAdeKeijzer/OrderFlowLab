@@ -63,8 +63,6 @@ class OrderService(
             payload = objectMapper.writeValueAsString(orderCreatedEvent)
         )
 
-        orderEventPublisher.publishOrderCreated(orderCreatedEvent)
-
         return savedOrder
     }
 
