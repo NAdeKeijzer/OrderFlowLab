@@ -1,5 +1,6 @@
 package org.nikita.orderflowlab.order.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -7,11 +8,11 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.nikita.orderflowlab.inventory.service.InventoryReservationService
 import org.nikita.orderflowlab.order.dto.CreateOrderLineRequest
-import org.nikita.orderflowlab.order.event.OrderCreatedEvent
-import org.nikita.orderflowlab.order.event.OrderEventPublisher
 import org.nikita.orderflowlab.order.exception.*
 import org.nikita.orderflowlab.order.model.OrderStatus
 import org.nikita.orderflowlab.order.repository.OrderRepository
+import org.nikita.orderflowlab.outbox.repository.OutboxEventRepository
+import org.nikita.orderflowlab.outbox.service.OutboxEventService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import java.math.BigDecimal
@@ -19,18 +20,19 @@ import java.util.*
 
 @DataJpaTest
 class OrderServiceTest @Autowired constructor(
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val outboxEventRepository: OutboxEventRepository
 ) {
     private val inventoryReservationService = mock(InventoryReservationService::class.java)
+    private val outboxEventService = OutboxEventService(outboxEventRepository)
+    private val objectMapper = ObjectMapper()
+        .findAndRegisterModules()
 
     private val orderService = OrderService(
         orderRepository = orderRepository,
-        orderEventPublisher = object : OrderEventPublisher {
-            override fun publishOrderCreated(event: OrderCreatedEvent) {
-                // no-op for service tests
-            }
-        },
-        inventoryReservationService = inventoryReservationService
+        inventoryReservationService = inventoryReservationService,
+        outboxEventService = outboxEventService,
+        objectMapper = objectMapper
     )
 
     @Test
@@ -185,6 +187,23 @@ class OrderServiceTest @Autowired constructor(
         assertThatThrownBy {
             orderService.cancel(order.id)
         }.isInstanceOf(PaidOrderCannotBeCancelledException::class.java)
+    }
+
+    @Test
+    fun `creates order and stores order created event in outbox`() {
+        val order = orderService.createOrder(
+            customerId = UUID.randomUUID(),
+            items = listOf(validOrderLineRequest())
+        )
+
+        val outboxEvents = outboxEventRepository.findAll()
+            .filter { it.aggregateId == order.id }
+
+        assertThat(order.id).isNotNull()
+        assertThat(outboxEvents).hasSize(1)
+        assertThat(outboxEvents.first().eventType).isEqualTo("ORDER_CREATED")
+        assertThat(outboxEvents.first().payload).contains(order.id.toString())
+        assertThat(outboxEvents.first().publishedAt).isNull()
     }
 
     private fun validOrderLineRequest(
