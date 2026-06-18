@@ -102,6 +102,11 @@ src/main/kotlin/org/nikita/orderflowlab
 │   ├── model
 │   ├── repository
 │   └── service
+├── outbox
+│   ├── model
+│   ├── repository
+│   ├── scheduler
+│   └── service
 └── payment
     └── event
 ```
@@ -123,6 +128,10 @@ src/test/kotlin/org/nikita/orderflowlab
 │   ├── event
 │   ├── model
 │   ├── repository
+│   ├── service
+│   └── workflow
+├── outflow
+│   ├──repository
 │   └── service
 └── payment
     └── event    
@@ -136,7 +145,9 @@ src/main/resources/db/migration
 ├── V1__create_order_tables.sql
 ├── V2__add_unit_price_to_order_lines.sql
 ├── V3__create_inventory_reservations.sql
-└── V4__create_inventory_items.sql
+├── V4__create_inventory_items.sql
+├── V5__add_version_to_inventory_items.sql
+└── V6__create_outbox_events.sql
 ```
 
 ---
@@ -285,25 +296,25 @@ Invoke-RestMethod `
 ---
 
 ## Order Workflow
-
 When an order is created, inventory reservation and payment processing are handled asynchronously through Kafka events.
 
 Successful flow:
 
 1. Create inventory for the ordered products.
 2. Create an order.
-3. `OrderCreatedEvent` is published.
-4. `OrderCreatedConsumer` receives the event.
-5. `OrderWorkflowService` starts inventory reservation.
-6. `InventoryReservationService` reserves inventory.
-7. Available inventory quantity is reduced.
-8. `InventoryReservedEvent` is published.
-9. `InventoryReservedConsumer` receives the event.
-10. `PaymentRequestedEvent` is published.
-11. `PaymentRequestedConsumer` receives the event.
-12. `PaymentSucceededEvent` is published.
-13. `PaymentSucceededConsumer` receives the event.
-14. Order status transitions:
+3. `OrderCreatedEvent` is stored in the outbox table.
+4. The scheduled outbox publisher publishes the `OrderCreatedEvent` to Kafka.
+5. `OrderCreatedConsumer` receives the event.
+6. `OrderWorkflowService` starts inventory reservation.
+7. `InventoryReservationService` reserves inventory.
+8. Available inventory quantity is reduced.
+9. `InventoryReservedEvent` is published.
+10. `InventoryReservedConsumer` receives the event.
+11. `PaymentRequestedEvent` is published.
+12. `PaymentRequestedConsumer` receives the event.
+13. `PaymentSucceededEvent` is published.
+14. `PaymentSucceededConsumer` receives the event.
+15. Order status transitions:
 
 ```text
 CREATED
@@ -311,9 +322,18 @@ CREATED
 → CONFIRMED
 ```
 
-Inventory failure flow:
+## Inventory failure flow
 
 If inventory is missing or insufficient:
+
+1. `OrderCreatedEvent` is stored in the outbox table.
+2. The scheduled outbox publisher publishes the `OrderCreatedEvent`.
+3. `OrderCreatedConsumer` receives the event.
+4. `OrderWorkflowService` attempts to reserve inventory.
+5. Inventory reservation fails.
+6. `InventoryReservationFailedEvent` is published.
+7. `InventoryReservationFailedConsumer` receives the event.
+8. The order is marked as `INVENTORY_FAILED`.
 
 ```text
 CREATED
@@ -325,7 +345,7 @@ Inventory reservation is transactional:
 - reservations are rolled back on failure
 - inventory quantities remain unchanged
 
-Payment failure flow:
+## Payment failure flow:
 
 If payment fails after inventory has been reserved:
 
@@ -438,6 +458,7 @@ src/main/resources/application-postgres.yml
 * Flyway database migrations
 * Integration testing with MockMvc
 * Kotlin + Spring Boot development
+* Outbox pattern for reliable order event publishing
 
 ---
 
