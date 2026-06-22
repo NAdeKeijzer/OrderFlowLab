@@ -32,19 +32,19 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * Prevent reservation when stock is insufficient
 * Reduce available stock after reservation
 * Inventory updates are transactional
+* Optimistic locking
 
 ### Orders
 
 * Create orders
 * Retrieve all orders
-* Retrieve order by id
-* Pay orders
+* Retrieve order by ID
 * Cancel orders
 * Handle asynchronous inventory reservation
-* Confirm orders after successful inventory reservation
-* Mark orders as failed when inventory reservation fails
-* Confirm orders after successful payment
-* Mark orders as payment failed when payment fails
+* Automatically transition through the order lifecycle:
+    * `CREATED` → `INVENTORY_RESERVED` → `CONFIRMED`
+    * `CREATED` → `INVENTORY_FAILED`
+    * `CREATED` → `INVENTORY_RESERVED` → `PAYMENT_FAILED`
 
 ### Payments
 
@@ -70,6 +70,7 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * PostgreSQL profile for local development
 * H2 in-memory database for tests
 * Flyway database migrations
+* Outbox pattern
 
 ### Kafka
 
@@ -78,6 +79,14 @@ A Kotlin + Spring Boot project to explore order management flows, validation, RE
 * JSON serialization/deserialization
 * Kafka integration via Docker
 
+
+### Testing
+
+* Unit tests
+* Integration tests
+* Repository tests with PostgreSQL Testcontainers
+* Kafka integration tests with Kafka Testcontainers
+* End-to-end workflow tests
 ---
 
 # 🧱 Project Structure
@@ -122,7 +131,7 @@ src/test/kotlin/org/nikita/orderflowlab
 ├── inventory
 │   ├── event
 │   └── service
-│
+├── kafka
 ├── order    
 │   ├── api    
 │   ├── event

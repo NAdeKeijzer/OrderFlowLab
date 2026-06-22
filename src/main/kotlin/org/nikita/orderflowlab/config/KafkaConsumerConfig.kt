@@ -1,6 +1,5 @@
 package org.nikita.orderflowlab.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import org.springframework.kafka.support.serializer.JsonDeserializer
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer
 
 @Configuration
 @Profile("postgres")
@@ -23,22 +22,16 @@ class KafkaConsumerConfig {
 
     @Bean
     fun orderCreatedEventConsumerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ConsumerFactory<String, OrderCreatedEvent> {
         val props = kafkaProperties.buildConsumerProperties()
-
-        val deserializer = JsonDeserializer(
-            OrderCreatedEvent::class.java,
-            objectMapper
-        )
-
-        deserializer.addTrustedPackages("org.nikita.orderflowlab.order.event")
 
         return DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            deserializer
+            JacksonJsonDeserializer<OrderCreatedEvent>(
+                OrderCreatedEvent::class.java
+            )
         )
     }
 
@@ -53,22 +46,16 @@ class KafkaConsumerConfig {
 
     @Bean
     fun inventoryReservedEventConsumerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ConsumerFactory<String, InventoryReservedEvent> {
         val props = kafkaProperties.buildConsumerProperties()
-
-        val deserializer = JsonDeserializer(
-            InventoryReservedEvent::class.java,
-            objectMapper
-        )
-
-        deserializer.addTrustedPackages("org.nikita.orderflowlab.inventory.event")
 
         return DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            deserializer
+            JacksonJsonDeserializer<InventoryReservedEvent>(
+                InventoryReservedEvent::class.java
+            )
         )
     }
 
@@ -83,22 +70,16 @@ class KafkaConsumerConfig {
 
     @Bean
     fun inventoryReservationFailedEventConsumerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ConsumerFactory<String, InventoryReservationFailedEvent> {
         val props = kafkaProperties.buildConsumerProperties()
-
-        val deserializer = JsonDeserializer(
-            InventoryReservationFailedEvent::class.java,
-            objectMapper
-        )
-
-        deserializer.addTrustedPackages("org.nikita.orderflowlab.inventory.event")
 
         return DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            deserializer
+            JacksonJsonDeserializer<InventoryReservationFailedEvent>(
+                InventoryReservationFailedEvent::class.java
+            )
         )
     }
 
@@ -113,22 +94,16 @@ class KafkaConsumerConfig {
 
     @Bean
     fun paymentRequestedEventConsumerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ConsumerFactory<String, PaymentRequestedEvent> {
         val props = kafkaProperties.buildConsumerProperties()
-
-        val deserializer = JsonDeserializer(
-            PaymentRequestedEvent::class.java,
-            objectMapper
-        )
-
-        deserializer.addTrustedPackages("org.nikita.orderflowlab.payment.event")
 
         return DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            deserializer
+            JacksonJsonDeserializer<PaymentRequestedEvent>(
+                PaymentRequestedEvent::class.java
+            )
         )
     }
 
@@ -143,22 +118,16 @@ class KafkaConsumerConfig {
 
     @Bean
     fun paymentSucceededEventConsumerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ConsumerFactory<String, PaymentSucceededEvent> {
         val props = kafkaProperties.buildConsumerProperties()
-
-        val deserializer = JsonDeserializer(
-            PaymentSucceededEvent::class.java,
-            objectMapper
-        )
-
-        deserializer.addTrustedPackages("org.nikita.orderflowlab.payment.event")
 
         return DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            deserializer
+            JacksonJsonDeserializer<PaymentSucceededEvent>(
+                PaymentSucceededEvent::class.java
+            )
         )
     }
 
@@ -173,23 +142,17 @@ class KafkaConsumerConfig {
 
     @Bean
     fun paymentFailedEventConsumerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ConsumerFactory<String, PaymentFailedEvent> {
 
         val props = kafkaProperties.buildConsumerProperties()
 
-        val deserializer = JsonDeserializer(
-            PaymentFailedEvent::class.java,
-            objectMapper
-        )
-
-        deserializer.addTrustedPackages("org.nikita.orderflowlab.payment.event")
-
         return DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            deserializer
+            JacksonJsonDeserializer<PaymentFailedEvent>(
+                PaymentFailedEvent::class.java
+            )
         )
     }
 
