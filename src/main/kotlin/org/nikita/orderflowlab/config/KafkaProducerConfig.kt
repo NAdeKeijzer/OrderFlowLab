@@ -1,6 +1,5 @@
 package org.nikita.orderflowlab.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.StringSerializer
 import org.nikita.orderflowlab.inventory.event.InventoryReservationFailedEvent
 import org.nikita.orderflowlab.inventory.event.InventoryReservedEvent
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
-import org.springframework.kafka.support.serializer.JsonSerializer
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer
 
 @Configuration
 @Profile("postgres")
@@ -24,7 +23,6 @@ class KafkaProducerConfig {
     @Bean
     fun orderCreatedEventProducerFactory(
         kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
     ): ProducerFactory<String, OrderCreatedEvent> {
 
         val props = kafkaProperties.buildProducerProperties()
@@ -32,7 +30,7 @@ class KafkaProducerConfig {
         return DefaultKafkaProducerFactory(
             props,
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            JacksonJsonSerializer()
         )
     }
 
@@ -45,7 +43,6 @@ class KafkaProducerConfig {
     @Bean
     fun inventoryReservedEventProducerFactory(
         kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
     ): ProducerFactory<String, InventoryReservedEvent> {
 
         val props = kafkaProperties.buildProducerProperties()
@@ -53,7 +50,7 @@ class KafkaProducerConfig {
         return DefaultKafkaProducerFactory(
             props,
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            JacksonJsonSerializer()
         )
     }
 
@@ -65,8 +62,7 @@ class KafkaProducerConfig {
 
     @Bean
     fun inventoryReservationFailedEventProducerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ProducerFactory<String, InventoryReservationFailedEvent> {
 
         val props = kafkaProperties.buildProducerProperties()
@@ -74,7 +70,7 @@ class KafkaProducerConfig {
         return DefaultKafkaProducerFactory(
             props,
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            JacksonJsonSerializer()
         )
     }
 
@@ -86,8 +82,7 @@ class KafkaProducerConfig {
 
     @Bean
     fun paymentRequestedEventProducerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ProducerFactory<String, PaymentRequestedEvent> {
 
         val props = kafkaProperties.buildProducerProperties()
@@ -95,7 +90,7 @@ class KafkaProducerConfig {
         return DefaultKafkaProducerFactory(
             props,
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            JacksonJsonSerializer()
         )
     }
 
@@ -107,8 +102,7 @@ class KafkaProducerConfig {
 
     @Bean
     fun paymentSucceededEventProducerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ProducerFactory<String, PaymentSucceededEvent> {
 
         val props = kafkaProperties.buildProducerProperties()
@@ -116,7 +110,7 @@ class KafkaProducerConfig {
         return DefaultKafkaProducerFactory(
             props,
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            JacksonJsonSerializer()
         )
     }
 
@@ -128,8 +122,7 @@ class KafkaProducerConfig {
 
     @Bean
     fun paymentFailedEventProducerFactory(
-        kafkaProperties: KafkaProperties,
-        objectMapper: ObjectMapper
+        kafkaProperties: KafkaProperties
     ): ProducerFactory<String, PaymentFailedEvent> {
 
         val props = kafkaProperties.buildProducerProperties()
@@ -137,7 +130,7 @@ class KafkaProducerConfig {
         return DefaultKafkaProducerFactory(
             props,
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            JacksonJsonSerializer()
         )
     }
 
