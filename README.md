@@ -455,26 +455,25 @@ src/main/resources/application-postgres.yml
 * Asynchronous workflow orchestration
 * Inventory reservation with compensation
 * Payment processing workflow
+* Outbox pattern for reliable event publishing
+* Optimistic locking with JPA
 * Flyway database migrations
 * Integration testing with MockMvc
+* PostgreSQL integration testing with Testcontainers
 * Kotlin + Spring Boot development
-* Outbox pattern for reliable order event publishing
 
 ---
 
 # 🔮 Possible Improvements
 
-* Optimistic locking for inventory concurrency
+* Idempotent event processing
 * Retry policies & dead-letter queues
-* Outbox pattern
 * Distributed tracing
-* OpenAPI / Swagger
 * Authentication & authorization
-* Testcontainers
 * CI/CD pipeline
 * Kubernetes deployment
 * AWS deployment
-* Idempotent event processing
+* OpenAPI documentation enhancements
 
 ---
 
